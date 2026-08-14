@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: carfo-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-ChangezCeRootMotDePasse2026!}
+      MYSQL_DATABASE: ${DB_NAME:-carfo_contentieux}
+      MYSQL_USER: ${DB_USERNAME:-carfo}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ChangezCeMotDePasse2026!}
+    volumes:
+      - carfo-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    ports:
+      - "3306:3306"
+    networks:
+      - carfo-net
+
+  backend:
+    build:
+      context: ./contentieux/contentieux
+      dockerfile: Dockerfile
+    container_name: carfo-backend
+    environment:
+      DB_NAME: ${DB_NAME:-carfo_contentieux}
+      DB_USERNAME: ${DB_USERNAME:-carfo}
+      DB_PASSWORD: ${DB_PASSWORD:-ChangezCeMotDePasse2026!}
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      JAVA_OPTS: "-Xms256m -Xmx768m"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - carfo-uploads:/app/uploads
+    networks:
+      - carfo-net
+
+  frontend:
+    build:
+      context: ./contentieux-web
+      dockerfile: Dockerfile
+    container_name: carfo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - carfo-net
+
+volumes:
+  carfo-mysql-data:
+  carfo-uploads:
+
+networks:
+  carfo-net:
+    driver: bridge

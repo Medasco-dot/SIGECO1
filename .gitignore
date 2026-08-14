@@ -1,0 +1,37 @@
+# Secrets / environnement local
+.env
+.env.local
+
+# Logs
+*.log
+
+# Artefacts d'export générés localement
+/tmp-exports/
+/contentieux/contentieux/exports/
+
+# Build backend
+/contentieux/contentieux/target/
+/contentieux/target/
+
+# Build / dépendances frontend
+/contentieux-web/node_modules/
+/contentieux-web/dist/
+/contentieux-web/.angular/
+
+# IDE
+.vscode/
+
+# Outils d'assistance au développement (config locale, jamais versionnée)
+.claude/
+.cursor/
+.github/copilot*
+
+# Cache/wrapper Maven local (ne doit jamais être versionné, se retélécharge via mvnw)
+/contentieux/contentieux/.maven/
+
+# Fichiers de travail / sorties de build accidentellement enregistrés
+disk-check/
+Untitled-1.*
+contentieux-web/Untitled-1.*
+*_output.txt
+pdf-error.log
