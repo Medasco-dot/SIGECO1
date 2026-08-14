@@ -1,0 +1,32 @@
+:root {
+  --carfo-green: #11875d;
+  --carfo-green-dark: #0d6b49;
+  --carfo-green-light: #e8f5ef;
+  --carfo-blue: #005b96;
+  --carfo-blue-dark: #003b63;
+  --carfo-gold: #c9a227;
+  --carfo-ink: #1a2e3b;
+  --carfo-muted: #5a7180;
+  --carfo-line: #dce6eb;
+  --carfo-paper: #f4f7f9;
+  --carfo-white: #ffffff;
+  --carfo-shadow: 0 4px 24px rgba(0, 59, 99, 0.08);
+  --carfo-radius: 12px;
+  --carfo-font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--carfo-font);
+  background: var(--carfo-paper);
+  color: var(--carfo-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
