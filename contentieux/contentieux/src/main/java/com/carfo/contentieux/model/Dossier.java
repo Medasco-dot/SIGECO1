@@ -39,10 +39,6 @@ public class Dossier {
 
     @OneToMany(mappedBy = "dossier")
     @JsonIgnore
-    private List<AudienceDecision> audienceDecisions;
-
-    @OneToMany(mappedBy = "dossier")
-    @JsonIgnore
     private List<Document> documents;
 
     @OneToMany(mappedBy = "dossier")
@@ -72,9 +68,6 @@ public class Dossier {
 
     public TypeContentieux getTypeContentieux() { return typeContentieux; }
     public void setTypeContentieux(TypeContentieux typeContentieux) { this.typeContentieux = typeContentieux; }
-
-    public List<AudienceDecision> getAudienceDecisions() { return audienceDecisions; }
-    public void setAudienceDecisions(List<AudienceDecision> audienceDecisions) { this.audienceDecisions = audienceDecisions; }
 
     public List<Document> getDocuments() { return documents; }
     public void setDocuments(List<Document> documents) { this.documents = documents; }

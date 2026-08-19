@@ -1,16 +1,24 @@
 :root {
-  --carfo-green: #11875d;
-  --carfo-green-dark: #0d6b49;
-  --carfo-green-light: #e8f5ef;
-  --carfo-blue: #005b96;
-  --carfo-blue-dark: #003b63;
-  --carfo-gold: #c9a227;
-  --carfo-ink: #1a2e3b;
-  --carfo-muted: #5a7180;
-  --carfo-line: #dce6eb;
-  --carfo-paper: #f4f7f9;
+  /* Palette alignée sur l'identité visuelle réelle de carfo.bf (vert institutionnel),
+     avec une touche discrète des couleurs nationales (vert/or) du Burkina Faso. */
+  /* --carfo-green et --carfo-muted sont légèrement assombris par rapport au vert et au gris
+     d'origine extraits de carfo.bf : à l'identique, ils échouaient de peu (4.16-4.44:1) au
+     contraste WCAG 2.1 AA (4.5:1 minimum) requis pour le texte normal (cf. audit axe-core,
+     e2e/accessibilite.spec.ts). L'écart visuel est imperceptible, la teinte reste la même. */
+  --carfo-green: #0e8339;
+  --carfo-green-dark: #0a5f29;
+  --carfo-green-light: #e8f7ec;
+  --carfo-blue: #2c3e50;
+  --carfo-blue-dark: #1a2530;
+  --carfo-gold: #c9962f;
+  --carfo-gold-light: #f6ecd7;
+  --carfo-red: #c02b2b;
+  --carfo-ink: #16211a;
+  --carfo-muted: #5c6664;
+  --carfo-line: #dfe6e1;
+  --carfo-paper: #f5f8f6;
   --carfo-white: #ffffff;
-  --carfo-shadow: 0 4px 24px rgba(0, 59, 99, 0.08);
+  --carfo-shadow: 0 4px 24px rgba(15, 138, 60, 0.1);
   --carfo-radius: 12px;
   --carfo-font: 'Inter', system-ui, -apple-system, sans-serif;
 }

@@ -1,20 +1,15 @@
   <div class="carfo-app">
     @if (!isLoginRoute()) {
-      <div class="flash-bar">
-        <span class="flash-badge">Portail digital</span>
-        <p>Service Contentieux et Juridique CARFO · Suivi des dossiers, audiences et décisions</p>
-      </div>
-
-      <header class="top-header">
-        <a class="brand" routerLink="/tableau-de-bord">
-          <span class="brand-logo">C</span>
+      <aside class="sidebar" [class.open]="menuOpen()">
+        <a class="brand" routerLink="/tableau-de-bord" (click)="closeMenu()">
+          <span class="brand-logo">S</span>
           <span class="brand-text">
-            <strong>CARFO</strong>
-            <small>Contentieux • Service juridique</small>
+            <strong>SIGECO</strong>
+            <small>CARFO · Contentieux et juridique</small>
           </span>
         </a>
 
-        <nav class="main-nav">
+        <nav class="side-nav" (click)="closeMenu()">
           <a routerLink="/tableau-de-bord" routerLinkActive="active">Tableau de bord</a>
           <a routerLink="/dossiers" routerLinkActive="active">Dossiers</a>
           <a routerLink="/audiences" routerLinkActive="active">Audiences</a>
@@ -22,53 +17,58 @@
           <a routerLink="/juristes" routerLinkActive="active">Juristes</a>
           <a routerLink="/cabinets" routerLinkActive="active">Cabinets</a>
           <a routerLink="/documents" routerLinkActive="active">Documents</a>
+          @if (authService.hasRole(['chef_service'])) {
+            <a routerLink="/utilisateurs" routerLinkActive="active">Utilisateurs</a>
+          }
         </nav>
 
-        @if (authService.isAuthenticated()) {
-          <div class="user-zone">
-            <div class="user-info">
-              <span class="user-name">{{ authService.currentUser()?.identifiant }}</span>
-              <span class="user-role">{{ authService.currentUser()?.role }}</span>
+      </aside>
+
+      <div class="sidebar-scrim" [class.open]="menuOpen()" (click)="closeMenu()"></div>
+    }
+
+    <div class="app-main">
+      @if (!isLoginRoute()) {
+        <header class="top-bar">
+          <button
+            class="nav-toggle"
+            type="button"
+            (click)="toggleMenu()"
+            [attr.aria-expanded]="menuOpen()"
+            aria-controls="side-nav"
+            aria-label="Ouvrir ou fermer le menu de navigation"
+          >
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </button>
+          <div class="top-bar-title">
+            <h1>{{ pageTitle() }}</h1>
+            <p class="path">SIGECO · Service Contentieux et Juridique CARFO</p>
+          </div>
+
+          @if (authService.isAuthenticated()) {
+            <div class="top-bar-right">
+              <div class="etab-chip"><span class="sq"></span> CARFO</div>
+              <div class="user-menu" (click)="toggleUserMenu()" [class.open]="userMenuOpen()">
+                <div class="user-info">
+                  <span class="user-name">{{ authService.currentUser()?.identifiant }}</span>
+                  <span class="user-role">{{ authService.currentUser()?.role }}</span>
+                </div>
+                <div class="avatar">{{ userInitials() }}</div>
+                @if (userMenuOpen()) {
+                  <div class="user-dropdown" (click)="$event.stopPropagation()">
+                    <button type="button" (click)="logout()">Déconnexion</button>
+                  </div>
+                }
+              </div>
             </div>
-            <button class="btn-logout" type="button" (click)="logout()">Déconnexion</button>
-          </div>
-        }
-      </header>
-    }
+          }
+        </header>
+      }
 
-    <main class="page-content">
-      <router-outlet />
-    </main>
-
-    @if (!isLoginRoute()) {
-      <footer class="site-footer">
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <strong>CARFO</strong>
-            <p>Caisse Autonome de Retraite des Fonctionnaires — Burkina Faso. Gestion centralisée des dossiers contentieux du service juridique.</p>
-          </div>
-          <div>
-            <h4>Liens rapides</h4>
-            <ul>
-              <li><a routerLink="/dossiers">Dossiers contentieux</a></li>
-              <li><a routerLink="/audiences">Audiences</a></li>
-              <li><a routerLink="/documents">Documents</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4>Contact</h4>
-            <ul>
-              <li>Avenue Sembène Ousmane, 01 BP 5569 Ouaga 01</li>
-              <li>contact@carfo.org</li>
-              <li>+226 25 37 69 / 87 88 89 90</li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <span>© 2026 CARFO. Tous droits réservés.</span>
-          <a href="https://carfo.bf" target="_blank" rel="noopener">carfo.bf</a>
-          <a href="https://ecarfo.carfo.bf" target="_blank" rel="noopener">ecarfo.carfo.bf</a>
-        </div>
-      </footer>
-    }
+      <main class="page-content">
+        <router-outlet />
+      </main>
+    </div>
   </div>

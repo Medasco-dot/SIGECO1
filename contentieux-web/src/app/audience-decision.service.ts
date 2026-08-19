@@ -17,7 +17,8 @@ export interface AudienceDecision {
   montantObtenu?: number;
   montantDu?: number;
   fraisJustice?: number;
-  numeroDossier: string;
+  etapeDossierId: number;
+  numeroDossier?: string;
 }
 
 @Injectable({ providedIn: 'root' })

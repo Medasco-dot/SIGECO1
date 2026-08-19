@@ -18,6 +18,7 @@ public class EtapeDossier {
     private Etape etape;
 
     public enum Etape{
+        recours_gracieux,
         ouvert,
         en_instruction,
         juge,

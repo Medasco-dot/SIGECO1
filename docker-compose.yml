@@ -1,14 +1,12 @@
-version: '3.9'
-
 services:
   mysql:
     image: mysql:8.4
     container_name: carfo-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-ChangezCeRootMotDePasse2026!}
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?Definissez DB_ROOT_PASSWORD dans votre fichier .env, voir .env.example}"
       MYSQL_DATABASE: ${DB_NAME:-carfo_contentieux}
       MYSQL_USER: ${DB_USERNAME:-carfo}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-ChangezCeMotDePasse2026!}
+      MYSQL_PASSWORD: "${DB_PASSWORD:?Definissez DB_PASSWORD dans votre fichier .env, voir .env.example}"
     volumes:
       - carfo-mysql-data:/var/lib/mysql
     healthcheck:
@@ -18,7 +16,37 @@ services:
       retries: 10
       start_period: 30s
     ports:
-      - "3306:3306"
+      # 3307 côté hôte : évite le conflit avec une éventuelle instance MySQL locale déjà sur
+      # 3306 (ex. environnement de développement hors Docker). Le réseau interne carfo-net
+      # utilise toujours le port standard 3306 entre les conteneurs.
+      - "3307:3306"
+    networks:
+      - carfo-net
+
+  # Applique les migrations Flyway avant le démarrage du backend : l'auto-configuration Flyway
+  # intégrée à l'application ne se déclenche pas de façon fiable avec cette version de Spring
+  # Boot (constaté en développement), d'où le passage par le CLI Flyway officiel en conteneur
+  # séparé plutôt que de compter sur le démarrage de l'application pour créer le schéma.
+  flyway:
+    image: flyway/flyway:11.7
+    container_name: carfo-flyway
+    # Forme liste plutot que chaine unique : le "&" dans l'URL JDBC (separateur de parametres
+    # de requete) est sinon interprete comme un operateur shell lors du decoupage de la
+    # commande, tronquant silencieusement tout ce qui suit (constate : allowPublicKeyRetrieval
+    # et les arguments suivants disparaissaient, Flyway se rabattait sur l'aide au lieu de migrer).
+    command:
+      - -url=jdbc:mysql://mysql:3306/${DB_NAME:-carfo_contentieux}?useSSL=false&allowPublicKeyRetrieval=true
+      - -user=${DB_USERNAME:-carfo}
+      - -password=${DB_PASSWORD:?Definissez DB_PASSWORD dans votre fichier .env, voir .env.example}
+      - -connectRetries=10
+      - -baselineOnMigrate=true
+      - -baselineVersion=1
+      - migrate
+    volumes:
+      - ./contentieux/contentieux/src/main/resources/db/migration:/flyway/sql
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - carfo-net
 
@@ -30,7 +58,10 @@ services:
     environment:
       DB_NAME: ${DB_NAME:-carfo_contentieux}
       DB_USERNAME: ${DB_USERNAME:-carfo}
-      DB_PASSWORD: ${DB_PASSWORD:-ChangezCeMotDePasse2026!}
+      DB_PASSWORD: "${DB_PASSWORD:?Definissez DB_PASSWORD dans votre fichier .env, voir .env.example}"
+      JWT_SECRET: "${JWT_SECRET:?Definissez JWT_SECRET dans votre fichier .env, voir .env.example}"
+      FIELD_ENCRYPTION_KEY: "${FIELD_ENCRYPTION_KEY:?Definissez FIELD_ENCRYPTION_KEY dans votre fichier .env, voir .env.example}"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8080
       JAVA_OPTS: "-Xms256m -Xmx768m"
@@ -39,6 +70,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
     volumes:
       - carfo-uploads:/app/uploads
     networks:

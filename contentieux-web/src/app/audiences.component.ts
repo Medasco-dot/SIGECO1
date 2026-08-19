@@ -8,6 +8,8 @@ import {
   AudienceTypeEtape,
   AudienceIssueCarfo,
 } from './audience-decision.service';
+import { DossierService, Dossier, ETAPE_LABELS } from './dossier.service';
+import { EtapeDossierService, EtapeDossier } from './etape-dossier.service';
 
 const TYPE_ETAPE_LABELS: Record<AudienceTypeEtape, string> = {
   premiere_instance: 'Première instance',
@@ -79,10 +81,23 @@ const ISSUE_LABELS: Record<AudienceIssueCarfo, string> = {
 
       <div class="form-grid">
         <label>Identifiant (modification)<input [(ngModel)]="selectedId" name="selectedId" type="number"/></label>
-        <label>N° dossier<input [(ngModel)]="numeroDossier" name="numeroDossier"/></label>
+        <label>Rechercher dossier<input [(ngModel)]="numeroRecherche" name="numeroRecherche" placeholder="Saisir un numéro ou fragment"/></label>
+        <label style="align-self:end"><button type="button" (click)="rechercherDossiers()">Rechercher</button></label>
+        <label>Choisir dossier<select [(ngModel)]="numeroDossier" name="numeroDossier" (ngModelChange)="onDossierChange($event)">
+          <option value="">-- sélectionner --</option>
+          @for(d of dossierResults(); track d.numeroDossier){
+            <option [value]="d.numeroDossier">{{ d.numeroDossier }} - {{ d.typeContentieux?.nature || '' }}</option>
+          }
+        </select></label>
+        <label>Étape du dossier<select [(ngModel)]="etapeDossierId" name="etapeDossierId">
+          <option value="">-- sélectionner --</option>
+          @for(e of etapesDuDossier(); track e.id){
+            <option [value]="e.id">{{ ETAPE_LABELS[e.etape] }} ({{ e.dateDebut }})</option>
+          }
+        </select></label>
         <label>Date<input type="date" [(ngModel)]="date" name="date"/></label>
         <label>Lieu / juridiction<input [(ngModel)]="lieuAudience" name="lieuAudience"/></label>
-        <label>Étape<select [(ngModel)]="typeEtape" name="typeEtape">
+        <label>Type étape<select [(ngModel)]="typeEtape" name="typeEtape">
           <option value="premiere_instance">Première instance</option>
           <option value="appel">Appel</option>
           <option value="cassation">Cassation</option>
@@ -170,13 +185,20 @@ const ISSUE_LABELS: Record<AudienceIssueCarfo, string> = {
 export class AudiencesComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly audSvc = inject(AudienceDecisionService);
+  private readonly dossierSvc = inject(DossierService);
+  private readonly etapeSvc = inject(EtapeDossierService);
   private readonly api = `${environment.apiUrl}/api/audiences-decisions`;
 
   readonly TYPE_ETAPE_LABELS = TYPE_ETAPE_LABELS;
   readonly ISSUE_LABELS = ISSUE_LABELS;
+  readonly ETAPE_LABELS = ETAPE_LABELS;
 
   selectedId?: number | null = null;
+  numeroRecherche = '';
+  dossierResults = signal<Dossier[]>([]);
   numeroDossier = '';
+  etapesDuDossier = signal<EtapeDossier[]>([]);
+  etapeDossierId: number | '' = '';
   date = '';
   lieuAudience = '';
   typeEtape: AudienceTypeEtape = 'premiere_instance';
@@ -231,18 +253,46 @@ export class AudiencesComponent implements OnInit {
     this.chargerToutes();
   }
 
+  rechercherDossiers() {
+    if (!this.numeroRecherche || !this.numeroRecherche.trim()) {
+      this.message.set('Saisissez un numéro ou un fragment pour rechercher.');
+      return;
+    }
+    this.dossierSvc.rechercherParNumero(this.numeroRecherche.trim()).subscribe({
+      next: (list) => {
+        this.dossierResults.set(list);
+        this.message.set(list.length ? `${list.length} dossier(s) trouvé(s).` : 'Aucun dossier trouvé.');
+      },
+      error: () => this.message.set('Erreur lors de la recherche de dossiers.'),
+    });
+  }
+
+  onDossierChange(numeroDossier: string) {
+    this.etapeDossierId = '';
+    this.etapesDuDossier.set([]);
+    if (!numeroDossier) return;
+    this.etapeSvc.getByDossier(numeroDossier).subscribe({
+      next: (etapes) => this.etapesDuDossier.set(etapes),
+      error: () => this.message.set('Impossible de charger les étapes de ce dossier.'),
+    });
+  }
+
   charger(a: AudienceDecision) {
     this.selectedId = a.numAudienceDecision;
     this.numeroDossier = a.numeroDossier || '';
+    this.etapeDossierId = a.etapeDossierId;
     this.date = a.date || '';
     this.lieuAudience = a.lieuAudience || '';
     this.typeEtape = a.typeEtape || 'premiere_instance';
+    if (a.numeroDossier) this.onDossierChange(a.numeroDossier);
     this.message.set(`Édition de l'audience ${a.numAudienceDecision}.`);
   }
 
   vider() {
     this.selectedId = null;
     this.numeroDossier = '';
+    this.etapeDossierId = '';
+    this.etapesDuDossier.set([]);
     this.date = '';
     this.lieuAudience = '';
     this.typeEtape = 'premiere_instance';
@@ -250,15 +300,15 @@ export class AudiencesComponent implements OnInit {
   }
 
   enregistrer() {
-    if (!this.date || !this.typeEtape || !this.numeroDossier) {
-      this.message.set('Date, type d\'étape et N° dossier sont obligatoires.');
+    if (!this.date || !this.typeEtape || !this.etapeDossierId) {
+      this.message.set('Date, type d\'étape et étape du dossier sont obligatoires.');
       return;
     }
     const payload: Partial<AudienceDecision> = {
       date: this.date,
       lieuAudience: this.lieuAudience,
       typeEtape: this.typeEtape,
-      numeroDossier: this.numeroDossier,
+      etapeDossierId: Number(this.etapeDossierId),
     };
     const req = this.selectedId
       ? this.audSvc.update(this.selectedId, payload)

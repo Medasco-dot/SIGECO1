@@ -243,6 +243,15 @@ const LIEN_LABELS: Record<ImplicationLienParente, string> = {
               <label>Lieu<input formControlName="lieuAudience"/></label>
             </div>
             <div class="grid-2">
+              <label>Étape du dossier
+                <select formControlName="etapeDossierId">
+                  <option value="">-- sélectionner --</option>
+                  @for(e of etapes(); track e.id){<option [value]="e.id">{{ ETAPE_LABELS[e.etape] }} ({{ e.dateDebut }})</option>}
+                </select>
+              </label>
+              <label>&nbsp;</label>
+            </div>
+            <div class="grid-2">
               <label>Type étape
                 <select formControlName="typeEtape">
                   @for(t of TYPE_ETAPES; track t){<option [value]="t">{{ TYPE_ETAPE_LABELS[t] }}</option>}
@@ -279,6 +288,15 @@ const LIEN_LABELS: Record<ImplicationLienParente, string> = {
             <div class="grid-2">
               <label>Date<input type="date" formControlName="date"/></label>
               <label>Lieu<input formControlName="lieuAudience"/></label>
+            </div>
+            <div class="grid-2">
+              <label>Étape du dossier
+                <select formControlName="etapeDossierId">
+                  <option value="">-- sélectionner --</option>
+                  @for(e of etapes(); track e.id){<option [value]="e.id">{{ ETAPE_LABELS[e.etape] }} ({{ e.dateDebut }})</option>}
+                </select>
+              </label>
+              <label>&nbsp;</label>
             </div>
             <div class="grid-2">
               <label>Type étape
@@ -770,6 +788,7 @@ export class DossierDetailComponent implements OnInit {
     this.audForm = this.fb.group({
       date: ['', Validators.required],
       lieuAudience: [''],
+      etapeDossierId: ['', Validators.required],
       typeEtape: ['premiere_instance', Validators.required],
       natureDecision: [''],
       resumeDecision: [''],
@@ -982,6 +1001,7 @@ export class DossierDetailComponent implements OnInit {
     this.audForm.patchValue({
       date: a.date,
       lieuAudience: a.lieuAudience || '',
+      etapeDossierId: a.etapeDossierId,
       typeEtape: a.typeEtape,
       natureDecision: a.natureDecision || '',
       resumeDecision: a.resumeDecision || '',
@@ -997,7 +1017,7 @@ export class DossierDetailComponent implements OnInit {
   saveAud() {
     if (this.audForm.invalid) return;
     const v = this.audForm.getRawValue();
-    const payload = { ...v, numeroDossier: this.numeroDossier };
+    const payload = { ...v, etapeDossierId: Number(v.etapeDossierId) };
     Object.keys(payload).forEach((k) => { if (payload[k] === '' || payload[k] === null) delete payload[k]; });
     this.audSvc.create(payload).subscribe({
       next: (a) => {
@@ -1012,7 +1032,7 @@ export class DossierDetailComponent implements OnInit {
   updateAud() {
     if (this.audForm.invalid || !this.editingAudId()) return;
     const v = this.audForm.getRawValue();
-    const payload: any = { ...v, numeroDossier: this.numeroDossier };
+    const payload: any = { ...v, etapeDossierId: Number(v.etapeDossierId) };
     Object.keys(payload).forEach((k) => { if (payload[k] === '' || payload[k] === null) delete payload[k]; });
     this.audSvc.update(this.editingAudId()!, payload).subscribe({
       next: (updated) => {

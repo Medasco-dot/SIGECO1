@@ -18,6 +18,7 @@ export const routes: Routes = [
   { path: 'parties', component: ReferentielComponent, data: { mode: 'parties' }, canActivate: [authGuard] },
   { path: 'juristes', component: ReferentielComponent, data: { mode: 'juristes' }, canActivate: [authGuard] },
   { path: 'cabinets', component: ReferentielComponent, data: { mode: 'cabinets' }, canActivate: [authGuard] },
+  { path: 'utilisateurs', component: ReferentielComponent, data: { mode: 'utilisateurs' }, canActivate: [authGuard] },
   { path: 'audiences', component: AudiencesComponent, canActivate: [authGuard] },
   { path: 'documents', component: DocumentsComponent, canActivate: [authGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'login' },

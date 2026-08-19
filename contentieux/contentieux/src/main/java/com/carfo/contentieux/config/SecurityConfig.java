@@ -1,6 +1,7 @@
 package com.carfo.contentieux.config;
 
 import com.carfo.contentieux.model.Role;
+import com.carfo.contentieux.repository.RevokedTokenRepository;
 import com.carfo.contentieux.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,6 +44,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
+                        // /actuator/health reste ouvert (sondes de disponibilite des orchestrateurs).
+                        // Le reste de l'actuator (metriques Prometheus, env, etc.) ne doit pas etre
+                        // lisible par n'importe quel compte authentifie : meme restriction que les
+                        // statistiques, reservee a Chef de service et Direction Generale.
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").hasAnyRole(Role.chef_service.name(), Role.direction_generale.name())
                         // Generer/exporter des statistiques : reserve a Chef de service et Direction Generale
                         // (cf. diagramme de cas d'utilisation - le Juriste n'a pas ce cas d'utilisation)
                         .requestMatchers(HttpMethod.GET, "/api/statistiques/**").hasAnyRole(Role.chef_service.name(), Role.direction_generale.name())
@@ -51,6 +58,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/dossiers-juristes/**").hasRole(Role.chef_service.name())
                         .requestMatchers(HttpMethod.PUT, "/api/dossiers-juristes/**").hasRole(Role.chef_service.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/dossiers-juristes/**").hasRole(Role.chef_service.name())
+                        // Gerer les comptes utilisateurs (creation/modification/suppression) : reserve
+                        // a Chef de service, qui supervise l'equipe (le Juriste ne doit pas pouvoir
+                        // creer ou modifier des comptes, y compris le sien).
+                        .requestMatchers(HttpMethod.POST, "/api/utilisateurs/**").hasRole(Role.chef_service.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/utilisateurs/**").hasRole(Role.chef_service.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/utilisateurs/**").hasRole(Role.chef_service.name())
                         .requestMatchers(HttpMethod.POST, "/api/**").hasRole(Role.juriste.name())
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole(Role.juriste.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole(Role.juriste.name())
@@ -62,22 +75,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService) {
-        return new JwtAuthenticationFilter(jwtService);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService, RevokedTokenRepository revokedTokenRepository) {
+        return new JwtAuthenticationFilter(jwtService, revokedTokenRepository);
     }
 
     public static class JwtAuthenticationFilter extends OncePerRequestFilter {
-        private final JwtService jwtService;
+        public static final String CLAIMS_REQUEST_ATTRIBUTE = "jwtClaims";
 
-        public JwtAuthenticationFilter(JwtService jwtService) {
+        private final JwtService jwtService;
+        private final RevokedTokenRepository revokedTokenRepository;
+
+        public JwtAuthenticationFilter(JwtService jwtService, RevokedTokenRepository revokedTokenRepository) {
             this.jwtService = jwtService;
+            this.revokedTokenRepository = revokedTokenRepository;
         }
 
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
                 throws ServletException, IOException {
             String path = request.getRequestURI();
-            if ("/api/auth/login".equals(path) || "/api/auth/login/".equals(path)) {
+            if ("/api/auth/login".equals(path) || "/api/auth/login/".equals(path)
+                    || path.equals("/actuator/health") || path.startsWith("/actuator/health/")) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -99,6 +117,12 @@ public class SecurityConfig {
                 return;
             }
 
+            if (revokedTokenRepository.existsByJti(claims.getJti())) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token revoque (deconnexion effectuee)");
+                return;
+            }
+
+            request.setAttribute(CLAIMS_REQUEST_ATTRIBUTE, claims);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     claims.getIdentifiant(),
                     null,

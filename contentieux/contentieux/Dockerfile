@@ -16,4 +16,4 @@ ENV SPRING_PROFILES_ACTIVE=docker
 ENV JAVA_OPTS=""
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar /app/app.jar" ]
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 CMD curl -f http://localhost:8080/actuator/health || curl -f http://localhost:8080/api/utilisateurs/whoami || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 CMD curl -f http://127.0.0.1:8080/actuator/health || exit 1

@@ -11,7 +11,11 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -30,6 +34,7 @@ public class JwtService {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_MS);
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(identifiant)
                 .claim(ROLE_CLAIM, role)
                 .issuedAt(now)
@@ -49,10 +54,13 @@ public class JwtService {
                     .parseSignedClaims(token)
                     .getPayload();
             String role = claims.get(ROLE_CLAIM, String.class);
-            if (role == null) {
+            if (role == null || claims.getId() == null) {
                 return null;
             }
-            return new JwtClaims(claims.getSubject(), role);
+            LocalDateTime expiration = claims.getExpiration() != null
+                    ? LocalDateTime.ofInstant(claims.getExpiration().toInstant(), ZoneId.systemDefault())
+                    : LocalDateTime.now().plusHours(8);
+            return new JwtClaims(claims.getSubject(), role, claims.getId(), expiration);
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
@@ -69,10 +77,14 @@ public class JwtService {
     public static class JwtClaims {
         private final String identifiant;
         private final String role;
+        private final String jti;
+        private final LocalDateTime expiration;
 
-        public JwtClaims(String identifiant, String role) {
+        public JwtClaims(String identifiant, String role, String jti, LocalDateTime expiration) {
             this.identifiant = identifiant;
             this.role = role;
+            this.jti = jti;
+            this.expiration = expiration;
         }
 
         public String getIdentifiant() {
@@ -81,6 +93,14 @@ public class JwtService {
 
         public String getRole() {
             return role;
+        }
+
+        public String getJti() {
+            return jti;
+        }
+
+        public LocalDateTime getExpiration() {
+            return expiration;
         }
     }
 }

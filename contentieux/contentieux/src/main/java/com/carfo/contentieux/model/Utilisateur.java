@@ -1,5 +1,6 @@
 package com.carfo.contentieux.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ public class Utilisateur {
     @NotBlank
     @Size(max = 255)
     @Column(name = "mot_de_passe", nullable = false, length = 255)
+    @JsonIgnore
     private String motDePasse;
 
     @NotBlank

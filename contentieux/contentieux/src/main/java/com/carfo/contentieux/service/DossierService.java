@@ -14,6 +14,7 @@ import com.carfo.contentieux.repository.DossierCabinetRepository;
 import com.carfo.contentieux.repository.DossierJuristeRepository;
 import com.carfo.contentieux.repository.DocumentRepository;
 import com.carfo.contentieux.repository.ImplicationRepository;
+import com.carfo.contentieux.model.AuditLog;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -44,6 +45,7 @@ public class DossierService {
     private final AudienceDecisionRepository audienceDecisionRepository;
     private final DocumentRepository documentRepository;
     private final ImplicationRepository implicationRepository;
+    private final AuditService auditService;
     private final Object numeroDossierGenerationLock = new Object();
 
     @PersistenceContext
@@ -59,6 +61,7 @@ public class DossierService {
                           AudienceDecisionRepository audienceDecisionRepository,
                           DocumentRepository documentRepository,
                           ImplicationRepository implicationRepository,
+                          AuditService auditService,
                           MeterRegistry meterRegistry,
                           PlatformTransactionManager transactionManager) {
         this.dossierRepository = dossierRepository;
@@ -68,6 +71,7 @@ public class DossierService {
         this.audienceDecisionRepository = audienceDecisionRepository;
         this.documentRepository = documentRepository;
         this.implicationRepository = implicationRepository;
+        this.auditService = auditService;
         this.meterRegistry = meterRegistry;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW");
@@ -105,6 +109,8 @@ public class DossierService {
                 initial.setDossier(saved);
                 etapeDossierRepository.save(initial);
             }
+            auditService.enregistrer(AuditLog.Action.CREATE, "Dossier", saved.getNumeroDossier(),
+                    "numeroDossier fourni par le client");
             return saved;
         }
 
@@ -144,6 +150,9 @@ public class DossierService {
             }
         }
 
+        if (saved != null) {
+            auditService.enregistrer(AuditLog.Action.CREATE, "Dossier", saved.getNumeroDossier(), "numero genere automatiquement");
+        }
         return saved;
     }
 
@@ -163,36 +172,47 @@ public class DossierService {
         Dossier existant = dossierRepository.findById(numeroDossier)
                 .orElseThrow(() -> new ResourceNotFoundException("Dossier introuvable avec le numéro " + numeroDossier));
 
+        List<String> champsModifies = new ArrayList<>();
         if (dossier.getDateOuverture() != null) {
             com.carfo.contentieux.util.DateGuard.checkReasonable(dossier.getDateOuverture(), "dateOuverture");
             existant.setDateOuverture(dossier.getDateOuverture());
+            champsModifies.add("dateOuverture");
         }
         if (dossier.getResumeAffaire() != null) {
             existant.setResumeAffaire(dossier.getResumeAffaire());
+            champsModifies.add("resumeAffaire");
         }
         if (dossier.getObservation() != null) {
             existant.setObservation(dossier.getObservation());
+            champsModifies.add("observation");
         }
         if (dossier.getRisqueFinancier() != null) {
             existant.setRisqueFinancier(dossier.getRisqueFinancier());
+            champsModifies.add("risqueFinancier");
         }
         if (dossier.getMontantReclame() != null) {
             existant.setMontantReclame(dossier.getMontantReclame());
+            champsModifies.add("montantReclame");
         }
         if (dossier.getFraisJustice() != null) {
             existant.setFraisJustice(dossier.getFraisJustice());
+            champsModifies.add("fraisJustice");
         }
         if (dossier.getTypeContentieux() != null) {
             existant.setTypeContentieux(dossier.getTypeContentieux());
+            champsModifies.add("typeContentieux");
         }
-        return dossierRepository.save(existant);
+        Dossier sauvegarde = dossierRepository.save(existant);
+        auditService.enregistrer(AuditLog.Action.UPDATE, "Dossier", numeroDossier,
+                "champs modifies: " + String.join(", ", champsModifies));
+        return sauvegarde;
     }
 
     @Transactional
     public void recalculerFraisJustice(String numeroDossier) {
         Dossier dossier = dossierRepository.findById(numeroDossier)
                 .orElseThrow(() -> new ResourceNotFoundException("Dossier introuvable avec le numéro " + numeroDossier));
-        List<AudienceDecision> decisions = audienceDecisionRepository.findByDossier_NumeroDossier(numeroDossier);
+        List<AudienceDecision> decisions = audienceDecisionRepository.findByEtapeDossier_Dossier_NumeroDossier(numeroDossier);
         BigDecimal total = BigDecimal.ZERO;
         if (decisions != null) {
             for (AudienceDecision d : decisions) {
@@ -394,12 +414,15 @@ public class DossierService {
         if (!dossierRepository.existsById(numeroDossier)) {
             throw new ResourceNotFoundException("Dossier introuvable avec le numéro " + numeroDossier);
         }
-        audienceDecisionRepository.deleteAll(audienceDecisionRepository.findByDossier_NumeroDossier(numeroDossier));
+        // Doit precede la suppression des etapes : AudienceDecision reference desormais EtapeDossier.
+        audienceDecisionRepository.deleteAll(audienceDecisionRepository.findByEtapeDossier_Dossier_NumeroDossier(numeroDossier));
         documentRepository.deleteAll(documentRepository.findByDossier_NumeroDossier(numeroDossier));
         implicationRepository.deleteAll(implicationRepository.findByDossier_NumeroDossier(numeroDossier));
         dossierJuristeRepository.deleteAll(dossierJuristeRepository.findByDossier_NumeroDossier(numeroDossier));
         dossierCabinetRepository.deleteAll(dossierCabinetRepository.findByDossier_NumeroDossier(numeroDossier));
         etapeDossierRepository.deleteAll(etapeDossierRepository.findByDossier_NumeroDossier(numeroDossier));
         dossierRepository.deleteById(numeroDossier);
+        auditService.enregistrer(AuditLog.Action.DELETE, "Dossier", numeroDossier,
+                "suppression du dossier et de ses elements rattaches (etapes, audiences, documents, implications, juristes, cabinets)");
     }
 }

@@ -147,10 +147,20 @@ public class TestDataController {
             try { documentService.createDocument(docNoFile); } catch (Exception ex) { }
         }
 
-        // 6) Audience (create then update decision)
+        // 6) Etape de dossier (creee avant l'audience/decision, qui s'y rattache desormais)
+        EtapeDossier savedEtape = null;
         if (savedD1 != null) {
+            EtapeDossier et = new EtapeDossier();
+            et.setEtape(EtapeDossier.Etape.en_instruction);
+            et.setDateDebut(LocalDate.parse("2026-08-16"));
+            et.setDossier(savedD1);
+            try { savedEtape = etapeDossierService.createEtapeDossier(et); } catch (Exception ex) { }
+        }
+
+        // 7) Audience (create then update decision)
+        if (savedEtape != null) {
             AudienceDecision aud = new AudienceDecision();
-            aud.setDate(LocalDate.parse("2026-08-15")); aud.setLieuAudience("Tribunal du travail de Ouagadougou (test)"); aud.setTypeEtape(AudienceDecision.TypeEtape.premiere_instance); aud.setDossier(savedD1);
+            aud.setDate(LocalDate.parse("2026-08-15")); aud.setLieuAudience("Tribunal du travail de Ouagadougou (test)"); aud.setTypeEtape(AudienceDecision.TypeEtape.premiere_instance); aud.setEtapeDossier(savedEtape);
             AudienceDecision savedAud = null;
             try { savedAud = audienceDecisionService.createAudienceDecision(aud); } catch (Exception ex) { }
             if (savedAud != null) {
@@ -162,15 +172,6 @@ public class TestDataController {
                 upd.setFraisJustice(BigDecimal.valueOf(20000));
                 try { audienceDecisionService.updateAudienceDecision(savedAud.getNumAudienceDecision(), upd); } catch (Exception ex) { }
             }
-        }
-
-        // 7) Etape de dossier
-        if (savedD1 != null) {
-            EtapeDossier et = new EtapeDossier();
-            et.setEtape(EtapeDossier.Etape.en_instruction);
-            et.setDateDebut(LocalDate.parse("2026-08-16"));
-            et.setDossier(savedD1);
-            try { etapeDossierService.createEtapeDossier(et); } catch (Exception ex) { }
         }
 
         result.put("status","ok");

@@ -43,6 +43,10 @@ export class DocumentService {
     return this.http.post<DocumentTypeOption>(this.typeApi, payload);
   }
 
+  deleteDocumentType(code: string) {
+    return this.http.delete<void>(`${this.typeApi}/${code}`);
+  }
+
   rechercherParType(type: DocumentType) {
     return this.http.get<Document[]>(`${this.api}/recherche/type`, { params: { type } });
   }

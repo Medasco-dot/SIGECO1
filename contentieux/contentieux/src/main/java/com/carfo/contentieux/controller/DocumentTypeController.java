@@ -1,33 +1,55 @@
 package com.carfo.contentieux.controller;
 
+import com.carfo.contentieux.dto.TypeDocumentDTO;
+import com.carfo.contentieux.model.TypeDocument;
+import com.carfo.contentieux.service.TypeDocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
-@Tag(name = "Document types", description = "Liste des types de documents supportés pour les formulaires")
+@Tag(name = "Document types", description = "Référentiel des types de documents pouvant être associés à un dossier")
 @RestController
 @RequestMapping("/api/document-types")
 public class DocumentTypeController {
 
+    private final TypeDocumentService typeDocumentService;
+
+    public DocumentTypeController(TypeDocumentService typeDocumentService) {
+        this.typeDocumentService = typeDocumentService;
+    }
+
     @Operation(summary = "Récupérer la liste des types de document")
     @GetMapping
-    public List<String> getDocumentTypes() {
-        // Keep in sync with frontend expectations / test dataset
-        return Arrays.asList(
-                "requete",
-                "piece_justificative",
-                "pv_audience",
-                "releve_general_service",
-                "indice",
-                "acte_carriere",
-                "assignation",
-                "convocation",
-                "decision_justice"
-        );
+    public List<TypeDocument> getAll() {
+        return typeDocumentService.getAll();
+    }
+
+    @Operation(summary = "Créer un nouveau type de document")
+    @PostMapping
+    public ResponseEntity<TypeDocument> create(@Valid @RequestBody TypeDocumentDTO dto) {
+        TypeDocument t = new TypeDocument();
+        t.setCode(dto.getCode());
+        t.setLibelle(dto.getLibelle());
+        return ResponseEntity.status(HttpStatus.CREATED).body(typeDocumentService.create(t));
+    }
+
+    @Operation(summary = "Modifier le libellé d'un type de document existant")
+    @PutMapping("/{code}")
+    public ResponseEntity<TypeDocument> update(@PathVariable String code, @Valid @RequestBody TypeDocumentDTO dto) {
+        TypeDocument t = new TypeDocument();
+        t.setLibelle(dto.getLibelle());
+        return ResponseEntity.ok(typeDocumentService.update(code, t));
+    }
+
+    @Operation(summary = "Supprimer un type de document (refusé s'il est déjà utilisé par un document)")
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> delete(@PathVariable String code) {
+        typeDocumentService.delete(code);
+        return ResponseEntity.noContent().build();
     }
 }

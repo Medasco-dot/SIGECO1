@@ -22,15 +22,15 @@ public class AudienceDecisionService {
     }
 
     public List<AudienceDecision> getAllAudienceDecisions() { return audienceDecisionRepository.findAll(); }
-    public List<AudienceDecision> getAudienceDecisionsByDossier(String numeroDossier) { return audienceDecisionRepository.findByDossier_NumeroDossier(numeroDossier); }
+    public List<AudienceDecision> getAudienceDecisionsByDossier(String numeroDossier) { return audienceDecisionRepository.findByEtapeDossier_Dossier_NumeroDossier(numeroDossier); }
     public Optional<AudienceDecision> getAudienceDecisionById(Integer id) { return audienceDecisionRepository.findById(id); }
 
     @Transactional
     public AudienceDecision createAudienceDecision(AudienceDecision audienceDecision) {
         DateGuard.checkReasonable(audienceDecision.getDate(), "date");
         AudienceDecision saved = audienceDecisionRepository.save(audienceDecision);
-        if (saved.getDossier() != null && saved.getDossier().getNumeroDossier() != null) {
-            dossierService.recalculerFraisJustice(saved.getDossier().getNumeroDossier());
+        if (saved.getEtapeDossier() != null && saved.getEtapeDossier().getNumeroDossier() != null) {
+            dossierService.recalculerFraisJustice(saved.getEtapeDossier().getNumeroDossier());
         }
         return saved;
     }
@@ -53,12 +53,12 @@ public class AudienceDecisionService {
         existant.setMontantObtenu(audienceDecision.getMontantObtenu());
         existant.setMontantDu(audienceDecision.getMontantDu());
         existant.setFraisJustice(audienceDecision.getFraisJustice());
-        if (audienceDecision.getDossier() != null) {
-            existant.setDossier(audienceDecision.getDossier());
+        if (audienceDecision.getEtapeDossier() != null) {
+            existant.setEtapeDossier(audienceDecision.getEtapeDossier());
         }
         AudienceDecision updated = audienceDecisionRepository.save(existant);
-        if (updated.getDossier() != null && updated.getDossier().getNumeroDossier() != null) {
-            dossierService.recalculerFraisJustice(updated.getDossier().getNumeroDossier());
+        if (updated.getEtapeDossier() != null && updated.getEtapeDossier().getNumeroDossier() != null) {
+            dossierService.recalculerFraisJustice(updated.getEtapeDossier().getNumeroDossier());
         }
         return updated;
     }
@@ -67,8 +67,8 @@ public class AudienceDecisionService {
     public void deleteAudienceDecision(Integer id) {
         Optional<AudienceDecision> opt = audienceDecisionRepository.findById(id);
         String numeroDossier = null;
-        if (opt.isPresent() && opt.get().getDossier() != null) {
-            numeroDossier = opt.get().getDossier().getNumeroDossier();
+        if (opt.isPresent() && opt.get().getEtapeDossier() != null) {
+            numeroDossier = opt.get().getEtapeDossier().getNumeroDossier();
         }
         audienceDecisionRepository.deleteById(id);
         if (numeroDossier != null) {

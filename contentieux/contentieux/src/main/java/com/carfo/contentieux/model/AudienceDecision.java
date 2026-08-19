@@ -53,15 +53,24 @@ public class AudienceDecision {
     @Column(name = "frais_justice")
     private BigDecimal fraisJustice;
 
+    // Une audience/décision est rattachée à l'étape précise du dossier durant laquelle elle a
+    // eu lieu (et non au dossier globalement) : cardinalité AudienceDecision (1,1) —
+    // EtapeDossier (0,N), corrigée à la demande du maître de stage.
     @ManyToOne
-    @JoinColumn(name = "numero_dossier", nullable = false)
+    @JoinColumn(name = "id_etape_dossier", nullable = false)
     @JsonIgnore
-    private Dossier dossier;
+    private EtapeDossier etapeDossier;
 
     @JsonProperty("numeroDossier")
     @Transient
     public String getNumeroDossier() {
-        return dossier != null ? dossier.getNumeroDossier() : null;
+        return etapeDossier != null ? etapeDossier.getNumeroDossier() : null;
+    }
+
+    @JsonProperty("etapeDossierId")
+    @Transient
+    public Integer getEtapeDossierId() {
+        return etapeDossier != null ? etapeDossier.getId() : null;
     }
 
     public Integer getNumAudienceDecision() { return numAudienceDecision; }
@@ -95,6 +104,6 @@ public class AudienceDecision {
     public void setFraisJustice(BigDecimal fraisJustice) { this.fraisJustice = fraisJustice; }
 
     @JsonIgnore
-    public Dossier getDossier() { return dossier; }
-    public void setDossier(Dossier dossier) { this.dossier = dossier; }
+    public EtapeDossier getEtapeDossier() { return etapeDossier; }
+    public void setEtapeDossier(EtapeDossier etapeDossier) { this.etapeDossier = etapeDossier; }
 }

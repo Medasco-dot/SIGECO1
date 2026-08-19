@@ -38,9 +38,8 @@ public class AudienceDecisionDTO {
     @PositiveOrZero
     private BigDecimal fraisJustice;
 
-    @NotBlank
-    @Size(max = 50)
-    private String numeroDossier;
+    @NotNull
+    private Integer etapeDossierId;
 
     public Integer getNumAudienceDecision() { return numAudienceDecision; }
     public void setNumAudienceDecision(Integer numAudienceDecision) { this.numAudienceDecision = numAudienceDecision; }
@@ -72,6 +71,6 @@ public class AudienceDecisionDTO {
     public BigDecimal getFraisJustice() { return fraisJustice; }
     public void setFraisJustice(BigDecimal fraisJustice) { this.fraisJustice = fraisJustice; }
 
-    public String getNumeroDossier() { return numeroDossier; }
-    public void setNumeroDossier(String numeroDossier) { this.numeroDossier = numeroDossier; }
+    public Integer getEtapeDossierId() { return etapeDossierId; }
+    public void setEtapeDossierId(Integer etapeDossierId) { this.etapeDossierId = etapeDossierId; }
 }

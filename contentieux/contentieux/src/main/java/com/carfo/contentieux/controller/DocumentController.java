@@ -10,6 +10,7 @@ import com.carfo.contentieux.service.DocumentService;
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Tag(name = "Documents", description = "Gestion des documents liés aux dossiers")
 @RestController
@@ -30,10 +34,28 @@ public class DocumentController {
     private final DocumentService documentService;
     private final DossierRepository dossierRepository;
 
+    // Chemin de stockage des fichiers uploades : /app/uploads en docker (volume persistant
+    // "carfo-uploads", voir docker-compose.yml), repli sur un dossier temporaire en dev local.
+    @Value("${app.documents.storage:${java.io.tmpdir}/contentieux/uploads}")
+    private String uploadDirConfig;
+
+    @Value("${app.documents.allowed-content-types:}")
+    private String allowedContentTypesConfig;
+
     public DocumentController(DocumentService documentService,
                               DossierRepository dossierRepository) {
         this.documentService = documentService;
         this.dossierRepository = dossierRepository;
+    }
+
+    private Set<String> allowedContentTypes() {
+        if (allowedContentTypesConfig == null || allowedContentTypesConfig.isBlank()) {
+            return Set.of();
+        }
+        return Arrays.stream(allowedContentTypesConfig.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet());
     }
 
     @Operation(summary = "Récupérer tous les documents")
@@ -84,7 +106,11 @@ public class DocumentController {
             d.setDateAjout(LocalDate.parse(dateAjout));
         }
         if (file != null && !file.isEmpty()) {
-            Path uploadDir = Paths.get(System.getProperty("java.io.tmpdir"), "contentieux", "uploads");
+            Set<String> allowed = allowedContentTypes();
+            if (!allowed.isEmpty() && (file.getContentType() == null || !allowed.contains(file.getContentType()))) {
+                throw new InvalidFileException("Type de fichier non autorisé : " + file.getContentType());
+            }
+            Path uploadDir = Paths.get(uploadDirConfig);
             Files.createDirectories(uploadDir);
             String originalName = file.getOriginalFilename() == null || file.getOriginalFilename().isBlank()
                     ? "document"

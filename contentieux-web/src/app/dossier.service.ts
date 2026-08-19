@@ -29,6 +29,7 @@ export const NATURE_LABELS: Record<TypeContentieuxNature, string> = {
 };
 
 export type EtapeDossierEtape =
+  | 'recours_gracieux'
   | 'ouvert'
   | 'en_instruction'
   | 'juge'
@@ -38,6 +39,7 @@ export type EtapeDossierEtape =
   | 'classe_sans_suite';
 
 export const ETAPES_DOSSIER: EtapeDossierEtape[] = [
+  'recours_gracieux',
   'ouvert',
   'en_instruction',
   'juge',
@@ -48,6 +50,7 @@ export const ETAPES_DOSSIER: EtapeDossierEtape[] = [
 ];
 
 export const ETAPE_LABELS: Record<EtapeDossierEtape, string> = {
+  recours_gracieux: 'Recours gracieux',
   ouvert: 'Ouvert',
   en_instruction: 'En instruction',
   juge: 'Juge (première instance)',

@@ -13,4 +13,5 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     List<Document> findByTypeDocument(String typeDocument);
     List<Document> findByDateAjoutBetween(LocalDate debut, LocalDate fin);
     List<Document> findByTypeDocumentAndDossier_NumeroDossier(String typeDocument, String numeroDossier);
+    boolean existsByTypeDocument(String typeDocument);
 }

@@ -3,8 +3,8 @@ package com.carfo.contentieux.controller;
 import com.carfo.contentieux.dto.AudienceDecisionDTO;
 import com.carfo.contentieux.exception.ResourceNotFoundException;
 import com.carfo.contentieux.model.AudienceDecision;
-import com.carfo.contentieux.model.Dossier;
-import com.carfo.contentieux.repository.DossierRepository;
+import com.carfo.contentieux.model.EtapeDossier;
+import com.carfo.contentieux.repository.EtapeDossierRepository;
 import com.carfo.contentieux.service.AudienceDecisionService;
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,12 +20,12 @@ import java.util.List;
 @RequestMapping("/api/audiences-decisions")
 public class AudienceDecisionController {
     private final AudienceDecisionService audienceDecisionService;
-    private final DossierRepository dossierRepository;
+    private final EtapeDossierRepository etapeDossierRepository;
 
     public AudienceDecisionController(AudienceDecisionService audienceDecisionService,
-                                       DossierRepository dossierRepository) {
+                                       EtapeDossierRepository etapeDossierRepository) {
         this.audienceDecisionService = audienceDecisionService;
-        this.dossierRepository = dossierRepository;
+        this.etapeDossierRepository = etapeDossierRepository;
     }
 
     @Operation(summary = "Récupérer toutes les audiences et décisions")
@@ -70,9 +70,9 @@ public class AudienceDecisionController {
         ad.setMontantObtenu(dto.getMontantObtenu());
         ad.setMontantDu(dto.getMontantDu());
         ad.setFraisJustice(dto.getFraisJustice());
-        Dossier dossier = dossierRepository.findById(dto.getNumeroDossier())
-                .orElseThrow(() -> new ResourceNotFoundException("Dossier introuvable avec le numéro " + dto.getNumeroDossier()));
-        ad.setDossier(dossier);
+        EtapeDossier etapeDossier = etapeDossierRepository.findById(dto.getEtapeDossierId())
+                .orElseThrow(() -> new ResourceNotFoundException("Étape de dossier introuvable avec l'id " + dto.getEtapeDossierId()));
+        ad.setEtapeDossier(etapeDossier);
         return ResponseEntity.status(HttpStatus.CREATED).body(audienceDecisionService.createAudienceDecision(ad));
     }
 
@@ -89,10 +89,10 @@ public class AudienceDecisionController {
         ad.setMontantObtenu(dto.getMontantObtenu());
         ad.setMontantDu(dto.getMontantDu());
         ad.setFraisJustice(dto.getFraisJustice());
-        if (dto.getNumeroDossier() != null) {
-            Dossier dossier = dossierRepository.findById(dto.getNumeroDossier())
-                    .orElseThrow(() -> new ResourceNotFoundException("Dossier introuvable avec le numéro " + dto.getNumeroDossier()));
-            ad.setDossier(dossier);
+        if (dto.getEtapeDossierId() != null) {
+            EtapeDossier etapeDossier = etapeDossierRepository.findById(dto.getEtapeDossierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Étape de dossier introuvable avec l'id " + dto.getEtapeDossierId()));
+            ad.setEtapeDossier(etapeDossier);
         }
         return ResponseEntity.ok(audienceDecisionService.updateAudienceDecision(id, ad));
     }

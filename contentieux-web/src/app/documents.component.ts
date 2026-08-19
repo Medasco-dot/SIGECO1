@@ -115,6 +115,28 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
       <div class="form-actions">
         <button type="button" class="button secondary" (click)="creerTypeDocument()">Ajouter type à la liste</button>
       </div>
+
+      @if(typeMessage()){
+        <p class="notice">{{typeMessage()}}</p>
+      }
+
+      <div class="table-shell">
+        <table>
+          <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+          <tbody>
+            @for(t of DOC_TYPES(); track t.code){
+              <tr>
+                <td>{{t.code}}</td>
+                <td>{{t.libelle}}</td>
+                <td><button class="link danger" (click)="supprimerTypeDocument(t.code)">Supprimer</button></td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="3" class="empty">Aucun type de document.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="panel">
@@ -207,6 +229,7 @@ export class DocumentsComponent implements OnInit {
   readonly DOC_TYPES = signal<DocumentTypeOption[]>([]);
   newTypeCode = '';
   newTypeLibelle = '';
+  typeMessage = signal('');
 
   // dossier selection
   numeroDossier = '';
@@ -331,8 +354,9 @@ export class DocumentsComponent implements OnInit {
   }
 
   creerTypeDocument() {
+    this.typeMessage.set('');
     if (!this.newTypeCode.trim() || !this.newTypeLibelle.trim()) {
-      this.message.set('Saisissez un code et un libellé pour créer un type de document.');
+      this.typeMessage.set('Saisissez un code et un libellé pour créer un type de document.');
       return;
     }
     this.docSvc.createDocumentType({ code: this.newTypeCode.trim(), libelle: this.newTypeLibelle.trim() }).subscribe({
@@ -340,9 +364,21 @@ export class DocumentsComponent implements OnInit {
         this.newTypeCode = '';
         this.newTypeLibelle = '';
         this.chargerTypes();
-        this.message.set('Type de document ajouté à la liste.');
+        this.typeMessage.set('Type de document ajouté à la liste.');
       },
-      error: () => this.message.set("Impossible de créer ce type de document.")
+      error: (e) => this.typeMessage.set(e?.error?.detail || "Impossible de créer ce type de document."),
+    });
+  }
+
+  supprimerTypeDocument(code: string) {
+    if (!confirm(`Supprimer le type de document "${code}" ?`)) return;
+    this.typeMessage.set('');
+    this.docSvc.deleteDocumentType(code).subscribe({
+      next: () => {
+        this.chargerTypes();
+        this.typeMessage.set('Type de document supprimé.');
+      },
+      error: (e) => this.typeMessage.set(e?.error?.detail || "Impossible de supprimer ce type de document."),
     });
   }
 

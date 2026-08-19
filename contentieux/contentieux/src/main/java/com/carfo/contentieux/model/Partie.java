@@ -1,5 +1,6 @@
 package com.carfo.contentieux.model;
 
+import com.carfo.contentieux.util.ChiffrementCnibConverter;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,7 +17,8 @@ public class Partie {
     @Column(nullable = false, length = 50)
     private String prenom;
 
-    @Column(name = "numero_cnib", length = 20)
+    @Convert(converter = ChiffrementCnibConverter.class)
+    @Column(name = "numero_cnib", length = 255)
     private String numeroCnib;
 
     @Enumerated(EnumType.STRING)

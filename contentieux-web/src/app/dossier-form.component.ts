@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DossierService, TypeContentieuxNature, NATURE_LABELS } from './dossier.service';
@@ -41,7 +41,7 @@ import { finalize } from 'rxjs/operators';
         </div>
 
         <div class="form-actions">
-          <button type="submit" [disabled]="form.invalid || isSubmitting">Enregistrer</button>
+          <button type="submit" [disabled]="form.invalid || isSubmitting()">Enregistrer</button>
           <a class="button secondary" routerLink="/dossiers">Annuler</a>
         </div>
       </form>
@@ -85,7 +85,7 @@ export class DossierFormComponent implements OnInit {
     montantReclame: [0],
   });
 
-  isSubmitting = false;
+  isSubmitting = signal(false);
 
   ngOnInit(): void {
     if (!this.authService.canMutate()) {
@@ -99,13 +99,13 @@ export class DossierFormComponent implements OnInit {
   enregistrer() {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    if (this.isSubmitting) return;
-    this.isSubmitting = true;
+    if (this.isSubmitting()) return;
+    this.isSubmitting.set(true);
     this.api.create({
       dateOuverture: v.dateOuverture,
       montantReclame: v.montantReclame,
       nature: v.nature,
-    }).pipe(finalize(() => this.isSubmitting = false)).subscribe({
+    }).pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
       next: () => this.router.navigateByUrl('/dossiers'),
       error: (err) => {
         console.error('Erreur création dossier', err);

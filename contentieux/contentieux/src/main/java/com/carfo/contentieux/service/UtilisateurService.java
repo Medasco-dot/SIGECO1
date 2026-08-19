@@ -21,13 +21,16 @@ public class UtilisateurService {
     private final JuristeRepository juristeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository, JuristeRepository juristeRepository,
-                               PasswordEncoder passwordEncoder, JwtService jwtService) {
+                               PasswordEncoder passwordEncoder, JwtService jwtService,
+                               LoginAttemptService loginAttemptService) {
         this.utilisateurRepository = utilisateurRepository;
         this.juristeRepository = juristeRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     public List<Utilisateur> getAllUtilisateurs() {
@@ -63,13 +66,21 @@ public class UtilisateurService {
     }
 
     public LoginResponse authenticate(String identifiant, String motDePasse) {
-        Utilisateur utilisateur = utilisateurRepository.findByIdentifiant(identifiant)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiant ou mot de passe invalide"));
+        if (loginAttemptService.estBloque(identifiant)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Trop de tentatives échouées. Réessayez dans " + loginAttemptService.minutesAvantDeblocage(identifiant) + " minute(s).");
+        }
 
-        if (!passwordEncoder.matches(motDePasse, utilisateur.getMotDePasse())) {
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByIdentifiant(identifiant);
+        boolean motDePasseValide = utilisateurOpt.isPresent() && passwordEncoder.matches(motDePasse, utilisateurOpt.get().getMotDePasse());
+
+        if (!motDePasseValide) {
+            loginAttemptService.enregistrerEchec(identifiant);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiant ou mot de passe invalide");
         }
 
+        loginAttemptService.enregistrerSucces(identifiant);
+        Utilisateur utilisateur = utilisateurOpt.get();
         String token = jwtService.generateToken(utilisateur.getIdentifiant(), utilisateur.getRole().name());
         String matriculeJuriste = utilisateur.getJuriste() != null ? utilisateur.getJuriste().getMatricule() : null;
         return new LoginResponse(token, utilisateur.getIdentifiant(), utilisateur.getRole().name(), matriculeJuriste);

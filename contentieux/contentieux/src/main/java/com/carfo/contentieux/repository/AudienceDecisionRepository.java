@@ -9,7 +9,8 @@ import java.util.List;
 
 @Repository
 public interface AudienceDecisionRepository extends JpaRepository<AudienceDecision, Integer>{
-    List<AudienceDecision> findByDossier_NumeroDossier(String numeroDossier);
+    List<AudienceDecision> findByEtapeDossier_Dossier_NumeroDossier(String numeroDossier);
+    List<AudienceDecision> findByEtapeDossier_Id(Integer etapeDossierId);
     List<AudienceDecision> findByTypeEtape(AudienceDecision.TypeEtape typeEtape);
     List<AudienceDecision> findByDateBetween(LocalDate debut, LocalDate fin);
     List<AudienceDecision> findByIssuePourCarfo(AudienceDecision.IssuePourCarfo issue);
