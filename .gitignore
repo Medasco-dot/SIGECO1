@@ -20,6 +20,7 @@
 
 # IDE
 .vscode/
+.idea/
 
 # Outils d'assistance au développement (config locale, jamais versionnée)
 .claude/
