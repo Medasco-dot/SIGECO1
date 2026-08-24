@@ -3,9 +3,9 @@ WORKDIR /app
 COPY pom.xml ./
 COPY mvnw ./
 COPY .mvn ./.mvn
-RUN ./mvnw dependency:go-offline -DskipTests
+RUN --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -DskipTests
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app

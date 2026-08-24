@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 # --legacy-peer-deps : @analogjs/vite-plugin-angular ne déclare pas encore de compatibilité
 # avec @angular/build 22.x, alors que le projet utilise Angular 22.
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm npm install --legacy-peer-deps
 COPY angular.json tsconfig.json tsconfig.app.json ./
 COPY src ./src
 COPY public ./public
