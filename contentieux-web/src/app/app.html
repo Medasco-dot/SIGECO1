@@ -9,7 +9,7 @@
           </span>
         </a>
 
-        <nav class="side-nav" (click)="closeMenu()">
+        <nav id="main-nav" class="side-nav main-nav" (click)="closeMenu()">
           <a routerLink="/tableau-de-bord" routerLinkActive="active">Tableau de bord</a>
           <a routerLink="/dossiers" routerLinkActive="active">Dossiers</a>
           <a routerLink="/audiences" routerLinkActive="active">Audiences</a>
@@ -35,7 +35,7 @@
             type="button"
             (click)="toggleMenu()"
             [attr.aria-expanded]="menuOpen()"
-            aria-controls="side-nav"
+            aria-controls="main-nav"
             aria-label="Ouvrir ou fermer le menu de navigation"
           >
             <span class="nav-toggle-bar"></span>
@@ -43,7 +43,7 @@
             <span class="nav-toggle-bar"></span>
           </button>
           <div class="top-bar-title">
-            <h1>{{ pageTitle() }}</h1>
+            <p class="top-bar-heading">{{ pageTitle() }}</p>
             <p class="path">SIGECO · Service Contentieux et Juridique CARFO</p>
           </div>
 
@@ -58,7 +58,7 @@
                 <div class="avatar">{{ userInitials() }}</div>
                 @if (userMenuOpen()) {
                   <div class="user-dropdown" (click)="$event.stopPropagation()">
-                    <button type="button" (click)="logout()">Déconnexion</button>
+                    <button type="button" class="btn-logout" (click)="logout()">Déconnexion</button>
                   </div>
                 }
               </div>

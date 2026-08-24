@@ -35,6 +35,7 @@ test.describe('Authentification', () => {
     await page.click('.submit-button');
     await expect(page).toHaveURL(/\/tableau-de-bord/);
 
+    await page.click('.user-menu');
     await page.click('.btn-logout');
     await expect(page).toHaveURL(/\/login/);
 
