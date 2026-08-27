@@ -66,14 +66,22 @@ public class StatistiquesExportService {
             PDType0Font[] fontRegularHolder = {null};
             PDType0Font[] fontBoldHolder = {null};
             try {
+                // Secours specifique a un poste de developpement Windows : absent sur les
+                // environnements Linux (dont le conteneur Docker de production).
                 File f1 = new File("C:\\Windows\\Fonts\\arial.ttf");
                 File f2 = new File("C:\\Windows\\Fonts\\arialbd.ttf");
                 if (f1.exists()) { try (FileInputStream is = new FileInputStream(f1)) { fontRegularHolder[0] = PDType0Font.load(doc, is); } }
                 if (f2.exists()) { try (FileInputStream is = new FileInputStream(f2)) { fontBoldHolder[0] = PDType0Font.load(doc, is); } }
             } catch (Exception ex) { /* fall through to fallbacks below */ }
             if (fontRegularHolder[0] == null) {
-                InputStream fallback = PDType0Font.class.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSerif-Regular.ttf");
-                if (fallback != null) fontRegularHolder[0] = PDType0Font.load(doc, fallback);
+                // Police toujours presente dans le jar PDFBox lui-meme, donc ce secours
+                // fonctionne de maniere identique quel que soit l'OS hote.
+                try (InputStream fallback = PDType0Font.class.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")) {
+                    if (fallback != null) fontRegularHolder[0] = PDType0Font.load(doc, fallback);
+                }
+            }
+            if (fontRegularHolder[0] == null) {
+                throw new IllegalStateException("Impossible de charger une police pour l'export PDF (aucun des secours n'a fonctionne)");
             }
             if (fontBoldHolder[0] == null) fontBoldHolder[0] = fontRegularHolder[0];
             final PDType0Font fontRegular = fontRegularHolder[0];
