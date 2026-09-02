@@ -10,8 +10,7 @@ import { finalize } from 'rxjs/operators';
   imports: [ReactiveFormsModule, RouterLink],
   template: `
     <section class="page-intro compact">
-      <div>
-        <p class="eyebrow">Dossiers</p>
+      <div>
         <h1>Créer un nouveau dossier</h1>
         <p class="intro">Enregistrez rapidement un nouveau dossier contentieux avec les informations essentielles.</p>
       </div>

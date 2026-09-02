@@ -27,8 +27,7 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   imports: [FormsModule],
   template: `
     <section class="page-intro">
-      <div>
-        <p class="eyebrow">Pièces jointes</p>
+      <div>
         <h1>Documents</h1>
         <p class="intro">Téléversez et consultez les pièces associées aux dossiers contentieux.</p>
       </div>

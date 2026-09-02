@@ -11,8 +11,7 @@ type Mode = 'parties' | 'juristes' | 'cabinets' | 'utilisateurs';
   imports: [ReactiveFormsModule],
   template: `
     <section class="page-intro">
-      <div>
-        <p class="eyebrow">Référentiels</p>
+      <div>
         <h1>{{ titre() }}</h1>
         <p class="intro">Gérez les référentiels métiers essentiels à la gestion du contentieux.</p>
       </div>

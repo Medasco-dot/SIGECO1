@@ -15,12 +15,8 @@ import { AuthService } from './auth.service';
   template: `
     <section class="dashboard-hero">
       <div class="hero-copy">
-        <p class="eyebrow">SIGECO · Service Contentieux et Juridique CARFO</p>
-        <h1>Tableau de bord de supervision</h1>
-        <p class="intro">
-          Vue consolidée du risque financier et de l’état d’avancement des contentieux.
-          Conforme au suivi que le chef de service souhaitait remplacer l’Excel existant.
-        </p>
+        <h1>Tableau de bord</h1>
+        <p class="intro">SIGECO — Service Contentieux et Juridique CARFO.</p>
         <div class="hero-actions">
           @if (canCreateDossier()) {
             <a class="button" routerLink="/dossiers/nouveau">+ Nouveau dossier</a>
@@ -37,7 +33,6 @@ import { AuthService } from './auth.service';
       </div>
       @if (canViewStatistiques()) {
         <div class="hero-highlight">
-          <span class="hero-pill">Données en temps réel</span>
           <h3>Risque financier cumulé</h3>
           <p class="risk">
             {{ s()?.risqueFinancierCumule ?? 0 | number:'1.2-2' }} FCFA
@@ -172,34 +167,26 @@ import { AuthService } from './auth.service';
         align-items: stretch;
         gap: 20px;
         margin-bottom: 18px;
-        padding: 20px 24px;
-        border-radius: 8px;
+        padding: 18px 22px;
+        border-radius: 6px;
         background: white;
         border: 1px solid var(--carfo-line);
-        border-left: 4px solid var(--carfo-green);
         color: var(--carfo-ink);
       }
       .hero-copy { flex: 1; }
-      .eyebrow { color: var(--carfo-green); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; font-weight: 700; }
-      .hero-copy h1 { margin: 0 0 10px; font-size: clamp(22px, 2.6vw, 28px); color: var(--carfo-ink); }
-      .intro { color: var(--carfo-muted); max-width: 620px; line-height: 1.6; }
-      .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+      .hero-copy h1 { margin: 0 0 6px; font-size: 22px; color: var(--carfo-ink); }
+      .intro { color: var(--carfo-muted); max-width: 620px; }
+      .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
       .button.secondary { background: #eef1f0; color: var(--carfo-ink); border: 1px solid var(--carfo-line); }
       .hero-highlight {
-        min-width: 260px; max-width: 320px;
+        min-width: 240px; max-width: 300px;
         background: var(--carfo-paper);
         border: 1px solid var(--carfo-line);
-        border-radius: 8px; padding: 16px;
-        display: flex; flex-direction: column; justify-content: space-between;
+        border-radius: 6px; padding: 14px;
+        display: flex; flex-direction: column; justify-content: center;
       }
-      .hero-pill {
-        display: inline-block; background: var(--carfo-green-light); color: var(--carfo-green-dark);
-        border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.08em; align-self: flex-start;
-      }
-      .hero-highlight h3 { margin: 10px 0 6px; font-size: 15px; color: var(--carfo-muted); font-weight: 600; }
-      .hero-highlight .risk { font-size: 26px; font-weight: 800; margin: 4px 0 8px; color: var(--carfo-ink); }
-      .hero-highlight small { color: var(--carfo-muted); }
+      .hero-highlight h3 { margin: 0 0 6px; font-size: 13px; color: var(--carfo-muted); font-weight: 600; }
+      .hero-highlight .risk { font-size: 24px; font-weight: 700; margin: 0; color: var(--carfo-ink); }
       .metrics {
         display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px;
       }

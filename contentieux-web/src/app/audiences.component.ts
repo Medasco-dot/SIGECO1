@@ -28,8 +28,7 @@ const ISSUE_LABELS: Record<AudienceIssueCarfo, string> = {
   imports: [FormsModule],
   template: `
     <section class="page-intro">
-      <div>
-        <p class="eyebrow">Procédure</p>
+      <div>
         <h1>Audiences et décisions</h1>
         <p class="intro">Planifiez les audiences et gardez un historique clair des décisions.</p>
       </div>

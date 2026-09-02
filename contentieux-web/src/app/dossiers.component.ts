@@ -19,7 +19,6 @@ const NATURES: TypeContentieuxNature[] = ['pension_retraite', 'pension_reverseme
   template: `
     <section class="page-intro">
       <div>
-        <p class="eyebrow">Gestion</p>
         <h1>Dossiers contentieux</h1>
         <p class="intro">Recherchez et filtrez les dossiers avec une vue claire sur l’état du contentieux.</p>
       </div>
@@ -175,11 +174,10 @@ const NATURES: TypeContentieuxNature[] = ['pension_retraite', 'pension_reverseme
         margin-bottom: 8px;
       }
       .summary-card {
-        background: linear-gradient(135deg, var(--carfo-white), #f5fbf8);
+        background: white;
         border: 1px solid var(--carfo-line);
-        border-radius: 16px;
-        padding: 16px 18px;
-        box-shadow: var(--carfo-shadow);
+        border-radius: 6px;
+        padding: 14px 16px;
       }
       .summary-label {
         display: block;

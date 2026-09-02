@@ -81,8 +81,7 @@ const LIEN_LABELS: Record<ImplicationLienParente, string> = {
   imports: [DecimalPipe, RouterLink, ReactiveFormsModule],
   template: `
     <header>
-      <div>
-        <p class="eyebrow">Dossier</p>
+      <div>
         <h1>{{ dossier()?.numeroDossier || 'Chargement...' }}</h1>
         <div class="infos-strip">
           <span><strong>Type :</strong> {{ dossier()?.typeContentieux?.nature ? NATURE_LABELS[dossier()!.typeContentieux!.nature] : '—' }}</span>
