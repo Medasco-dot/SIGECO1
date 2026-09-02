@@ -1,74 +1,59 @@
   <div class="carfo-app">
     @if (!isLoginRoute()) {
-      <aside class="sidebar" [class.open]="menuOpen()">
+      <header class="navbar">
         <a class="brand" routerLink="/tableau-de-bord" (click)="closeMenu()">
           <span class="brand-logo">S</span>
-          <span class="brand-text">
-            <strong>SIGECO</strong>
-            <small>CARFO · Contentieux et juridique</small>
-          </span>
+          <span class="brand-text">SIGECO</span>
         </a>
 
-        <nav id="main-nav" class="side-nav main-nav" (click)="closeMenu()">
-          <a routerLink="/tableau-de-bord" routerLinkActive="active">Tableau de bord</a>
-          <a routerLink="/dossiers" routerLinkActive="active">Dossiers</a>
-          <a routerLink="/audiences" routerLinkActive="active">Audiences</a>
-          <a routerLink="/parties" routerLinkActive="active">Parties</a>
-          <a routerLink="/juristes" routerLinkActive="active">Juristes</a>
-          <a routerLink="/cabinets" routerLinkActive="active">Cabinets</a>
-          <a routerLink="/documents" routerLinkActive="active">Documents</a>
+        <button
+          class="nav-toggle"
+          type="button"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="menuOpen()"
+          aria-controls="main-nav"
+          aria-label="Ouvrir ou fermer le menu de navigation"
+        >
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+
+        <nav id="main-nav" class="main-nav" [class.open]="menuOpen()" (click)="closeMenu()">
+          <a routerLink="/tableau-de-bord" routerLinkActive="active"><span aria-hidden="true">🏠</span> Tableau de bord</a>
+          <a routerLink="/dossiers" routerLinkActive="active"><span aria-hidden="true">📁</span> Dossiers</a>
+          <a routerLink="/audiences" routerLinkActive="active"><span aria-hidden="true">⚖️</span> Audiences</a>
+          <a routerLink="/parties" routerLinkActive="active"><span aria-hidden="true">👥</span> Parties</a>
+          <a routerLink="/juristes" routerLinkActive="active"><span aria-hidden="true">🧑‍💼</span> Juristes</a>
+          <a routerLink="/cabinets" routerLinkActive="active"><span aria-hidden="true">🏛️</span> Cabinets</a>
+          <a routerLink="/documents" routerLinkActive="active"><span aria-hidden="true">📄</span> Documents</a>
           @if (authService.hasRole(['chef_service'])) {
-            <a routerLink="/utilisateurs" routerLinkActive="active">Utilisateurs</a>
+            <a routerLink="/utilisateurs" routerLinkActive="active"><span aria-hidden="true">🔑</span> Utilisateurs</a>
           }
         </nav>
 
-      </aside>
+        @if (authService.isAuthenticated()) {
+          <div class="navbar-right">
+            <div class="user-menu" (click)="toggleUserMenu()" [class.open]="userMenuOpen()">
+              <div class="avatar">{{ userInitials() }}</div>
+              <div class="user-info">
+                <span class="user-name">{{ authService.currentUser()?.identifiant }}</span>
+                <span class="user-role">{{ authService.currentUser()?.role }}</span>
+              </div>
+              @if (userMenuOpen()) {
+                <div class="user-dropdown" (click)="$event.stopPropagation()">
+                  <button type="button" class="btn-logout" (click)="logout()"><span aria-hidden="true">🚪</span> Déconnexion</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </header>
 
-      <div class="sidebar-scrim" [class.open]="menuOpen()" (click)="closeMenu()"></div>
+      <div class="nav-scrim" [class.open]="menuOpen()" (click)="closeMenu()"></div>
     }
 
-    <div class="app-main">
-      @if (!isLoginRoute()) {
-        <header class="top-bar">
-          <button
-            class="nav-toggle"
-            type="button"
-            (click)="toggleMenu()"
-            [attr.aria-expanded]="menuOpen()"
-            aria-controls="main-nav"
-            aria-label="Ouvrir ou fermer le menu de navigation"
-          >
-            <span class="nav-toggle-bar"></span>
-            <span class="nav-toggle-bar"></span>
-            <span class="nav-toggle-bar"></span>
-          </button>
-          <div class="top-bar-title">
-            <p class="top-bar-heading">{{ pageTitle() }}</p>
-            <p class="path">SIGECO · Service Contentieux et Juridique CARFO</p>
-          </div>
-
-          @if (authService.isAuthenticated()) {
-            <div class="top-bar-right">
-              <div class="etab-chip"><span class="sq"></span> CARFO</div>
-              <div class="user-menu" (click)="toggleUserMenu()" [class.open]="userMenuOpen()">
-                <div class="user-info">
-                  <span class="user-name">{{ authService.currentUser()?.identifiant }}</span>
-                  <span class="user-role">{{ authService.currentUser()?.role }}</span>
-                </div>
-                <div class="avatar">{{ userInitials() }}</div>
-                @if (userMenuOpen()) {
-                  <div class="user-dropdown" (click)="$event.stopPropagation()">
-                    <button type="button" class="btn-logout" (click)="logout()">Déconnexion</button>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-        </header>
-      }
-
-      <main class="page-content">
-        <router-outlet />
-      </main>
-    </div>
+    <main class="page-content">
+      <router-outlet />
+    </main>
   </div>
