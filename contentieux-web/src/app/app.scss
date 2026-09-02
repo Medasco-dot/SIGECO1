@@ -5,22 +5,24 @@
 
 .carfo-app {
   min-height: 100vh;
+  display: flex;
   background: var(--carfo-paper);
 }
 
-/* ---------- Navbar (barre horizontale, style logiciel de gestion classique) ---------- */
+/* ---------- Sidebar (menu a gauche, style logiciel de gestion) ---------- */
 
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 0 20px;
-  height: 58px;
-  background: var(--carfo-green);
-  border-bottom: 3px solid var(--carfo-green-dark);
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  min-height: 100vh;
   position: sticky;
   top: 0;
-  z-index: 100;
+  align-self: flex-start;
+  background: var(--carfo-green-dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .brand {
@@ -28,18 +30,19 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  flex-shrink: 0;
+  padding: 16px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .brand-logo {
   width: 30px;
   height: 30px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: var(--carfo-blue);
   color: white;
   display: grid;
   place-items: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 15px;
   flex-shrink: 0;
 }
@@ -47,54 +50,71 @@
 .brand-text {
   color: white;
   font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  font-size: 15px;
 }
 
-.main-nav {
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.side-nav a {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-}
-
-.main-nav a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 4px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 13.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  font-weight: 500;
+  border-left: 3px solid transparent;
 }
 
-.main-nav a:hover {
-  background: rgba(255, 255, 255, 0.12);
+.side-nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
   color: white;
 }
 
-.main-nav a.active {
-  background: rgba(255, 255, 255, 0.22);
+.side-nav a.active {
+  background: rgba(255, 255, 255, 0.08);
   color: white;
+  border-left-color: var(--carfo-blue);
 }
 
-.nav-scrim {
+.sidebar-scrim {
   display: none;
 }
 
-/* ---------- Zone utilisateur (droite de la navbar) ---------- */
+/* ---------- Colonne principale ---------- */
 
-.navbar-right {
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
   display: flex;
   align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  height: 52px;
   flex-shrink: 0;
+  background: white;
+  border-bottom: 1px solid var(--carfo-line);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.top-bar-spacer {
+  flex: 1;
 }
 
 .user-menu {
@@ -104,26 +124,25 @@
   gap: 8px;
   cursor: pointer;
   padding: 4px 10px 4px 4px;
-  border-radius: 6px;
-  transition: background 0.15s;
+  border-radius: 4px;
 }
 
 .user-menu:hover,
 .user-menu.open {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--carfo-paper);
 }
 
 .avatar {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: white;
-  color: var(--carfo-green-dark);
+  background: var(--carfo-green-dark);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11.5px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
@@ -135,13 +154,13 @@
 
 .user-menu .user-name {
   font-size: 12.5px;
-  font-weight: 700;
-  color: white;
+  font-weight: 600;
+  color: var(--carfo-ink);
 }
 
 .user-menu .user-role {
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--carfo-muted);
   text-transform: capitalize;
 }
 
@@ -151,8 +170,8 @@
   right: 0;
   background: white;
   border: 1px solid var(--carfo-line);
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   padding: 4px;
   min-width: 150px;
   z-index: 110;
@@ -181,27 +200,26 @@
   justify-content: center;
   align-items: center;
   gap: 4px;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 6px;
-  background: transparent;
+  border: 1px solid var(--carfo-line);
+  border-radius: 4px;
+  background: white;
   cursor: pointer;
   padding: 0;
-  margin-left: auto;
 }
 
 .nav-toggle-bar {
   display: block;
   width: 16px;
   height: 2px;
-  border-radius: 2px;
-  background: white;
+  border-radius: 1px;
+  background: var(--carfo-ink);
 }
 
 .page-content {
-  padding: 24px 28px 40px;
+  padding: 22px 26px 40px;
   max-width: 1680px;
   width: 100%;
   margin: 0 auto;
@@ -231,10 +249,10 @@
   }
 
   h1 {
-    font-size: 26px;
+    font-size: 22px;
     margin: 6px 0 0;
     color: var(--carfo-ink);
-    font-weight: 800;
+    font-weight: 700;
   }
 
   h2 {
@@ -470,44 +488,31 @@
 }
 
 @media (max-width: 960px) {
-  .brand-text {
-    display: none;
-  }
-
-  .main-nav {
-    display: none;
-    position: absolute;
+  .sidebar {
+    position: fixed;
     left: 0;
-    right: 0;
-    top: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    background: var(--carfo-green-dark);
-    padding: 8px;
-    z-index: 105;
-    max-height: calc(100vh - 58px);
-    overflow-y: auto;
+    top: 0;
+    height: 100vh;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.15s ease;
+    visibility: hidden;
   }
 
-  .main-nav.open {
-    display: flex;
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
   }
 
-  .main-nav a {
-    padding: 12px 14px;
-  }
-
-  .nav-scrim {
+  .sidebar-scrim {
     display: none;
     position: fixed;
     inset: 0;
-    top: 58px;
-    background: rgba(10, 15, 12, 0.35);
-    z-index: 95;
+    background: rgba(10, 15, 20, 0.4);
+    z-index: 190;
   }
 
-  .nav-scrim.open {
+  .sidebar-scrim.open {
     display: block;
   }
 
@@ -521,10 +526,10 @@
   }
 
   .page-content {
-    padding: 20px 16px 32px;
+    padding: 18px 16px 32px;
   }
 
-  .navbar {
+  .top-bar {
     padding: 0 14px;
   }
 

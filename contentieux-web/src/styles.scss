@@ -1,26 +1,25 @@
 :root {
-  /* Palette alignée sur l'identité visuelle réelle de carfo.bf (vert institutionnel),
-     avec une touche discrète des couleurs nationales (vert/or) du Burkina Faso. */
-  /* --carfo-green et --carfo-muted sont légèrement assombris par rapport au vert et au gris
-     d'origine extraits de carfo.bf : à l'identique, ils échouaient de peu (4.16-4.44:1) au
-     contraste WCAG 2.1 AA (4.5:1 minimum) requis pour le texte normal (cf. audit axe-core,
-     e2e/accessibilite.spec.ts). L'écart visuel est imperceptible, la teinte reste la même. */
-  --carfo-green: #0e8339;
-  --carfo-green-dark: #0a5f29;
-  --carfo-green-light: #e8f7ec;
-  --carfo-blue: #2c3e50;
-  --carfo-blue-dark: #1a2530;
-  --carfo-gold: #c9962f;
-  --carfo-gold-light: #f6ecd7;
-  --carfo-red: #c02b2b;
-  --carfo-ink: #16211a;
-  --carfo-muted: #5c6664;
-  --carfo-line: #dfe6e1;
-  --carfo-paper: #f5f8f6;
+  /* Palette gris-ardoise sobre (proche des couleurs par defaut d'un theme Bootstrap),
+     sans lien avec une charte graphique institutionnelle particuliere.
+     --carfo-green et --carfo-muted restent nommees ainsi pour ne pas devoir renommer
+     toutes les references dans les composants ; seules les valeurs ont change. Contraste
+     verifie manuellement (blanc sur --carfo-green >> 4.5:1, cf. e2e/accessibilite.spec.ts). */
+  --carfo-green: #37474f;
+  --carfo-green-dark: #263238;
+  --carfo-green-light: #eceff1;
+  --carfo-blue: #1c6ea4;
+  --carfo-blue-dark: #14507a;
+  --carfo-gold: #6c757d;
+  --carfo-gold-light: #f1f2f3;
+  --carfo-red: #b02a2a;
+  --carfo-ink: #212529;
+  --carfo-muted: #6c757d;
+  --carfo-line: #dee2e6;
+  --carfo-paper: #f8f9fa;
   --carfo-white: #ffffff;
-  --carfo-shadow: 0 4px 24px rgba(15, 138, 60, 0.1);
-  --carfo-radius: 12px;
-  --carfo-font: 'Inter', system-ui, -apple-system, sans-serif;
+  --carfo-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --carfo-radius: 6px;
+  --carfo-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 * {

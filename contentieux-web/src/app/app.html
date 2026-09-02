@@ -1,25 +1,12 @@
   <div class="carfo-app">
     @if (!isLoginRoute()) {
-      <header class="navbar">
+      <aside class="sidebar" [class.open]="menuOpen()">
         <a class="brand" routerLink="/tableau-de-bord" (click)="closeMenu()">
           <span class="brand-logo">S</span>
           <span class="brand-text">SIGECO</span>
         </a>
 
-        <button
-          class="nav-toggle"
-          type="button"
-          (click)="toggleMenu()"
-          [attr.aria-expanded]="menuOpen()"
-          aria-controls="main-nav"
-          aria-label="Ouvrir ou fermer le menu de navigation"
-        >
-          <span class="nav-toggle-bar"></span>
-          <span class="nav-toggle-bar"></span>
-          <span class="nav-toggle-bar"></span>
-        </button>
-
-        <nav id="main-nav" class="main-nav" [class.open]="menuOpen()" (click)="closeMenu()">
+        <nav id="main-nav" class="side-nav main-nav" (click)="closeMenu()">
           <a routerLink="/tableau-de-bord" routerLinkActive="active"><span aria-hidden="true">🏠</span> Tableau de bord</a>
           <a routerLink="/dossiers" routerLinkActive="active"><span aria-hidden="true">📁</span> Dossiers</a>
           <a routerLink="/audiences" routerLinkActive="active"><span aria-hidden="true">⚖️</span> Audiences</a>
@@ -31,9 +18,30 @@
             <a routerLink="/utilisateurs" routerLinkActive="active"><span aria-hidden="true">🔑</span> Utilisateurs</a>
           }
         </nav>
+      </aside>
 
-        @if (authService.isAuthenticated()) {
-          <div class="navbar-right">
+      <div class="sidebar-scrim" [class.open]="menuOpen()" (click)="closeMenu()"></div>
+    }
+
+    <div class="app-main">
+      @if (!isLoginRoute()) {
+        <header class="top-bar">
+          <button
+            class="nav-toggle"
+            type="button"
+            (click)="toggleMenu()"
+            [attr.aria-expanded]="menuOpen()"
+            aria-controls="main-nav"
+            aria-label="Ouvrir ou fermer le menu de navigation"
+          >
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </button>
+
+          <div class="top-bar-spacer"></div>
+
+          @if (authService.isAuthenticated()) {
             <div class="user-menu" (click)="toggleUserMenu()" [class.open]="userMenuOpen()">
               <div class="avatar">{{ userInitials() }}</div>
               <div class="user-info">
@@ -46,14 +54,12 @@
                 </div>
               }
             </div>
-          </div>
-        }
-      </header>
+          }
+        </header>
+      }
 
-      <div class="nav-scrim" [class.open]="menuOpen()" (click)="closeMenu()"></div>
-    }
-
-    <main class="page-content">
-      <router-outlet />
-    </main>
+      <main class="page-content">
+        <router-outlet />
+      </main>
+    </div>
   </div>
