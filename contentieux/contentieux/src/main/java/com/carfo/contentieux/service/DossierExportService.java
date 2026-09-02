@@ -12,6 +12,7 @@ import com.carfo.contentieux.repository.AudienceDecisionRepository;
 import com.carfo.contentieux.repository.DossierCabinetRepository;
 import com.carfo.contentieux.repository.DossierJuristeRepository;
 import com.carfo.contentieux.repository.ImplicationRepository;
+import com.carfo.contentieux.util.SpreadsheetSanitizer;
 import org.springframework.stereotype.Service;
 
 import org.apache.poi.xwpf.usermodel.*;
@@ -211,10 +212,16 @@ public class DossierExportService {
             CellStyle currencyStyle = wb.createCellStyle();
             currencyStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0 \"FCFA\""));
 
+            // Texte long (résumé de décision, lieu d'audience) : retour à la ligne automatique
+            // plutôt qu'une colonne étirée à l'infini par autoSizeColumn.
+            CellStyle wrapStyle = wb.createCellStyle();
+            wrapStyle.setWrapText(true);
+            wrapStyle.setVerticalAlignment(VerticalAlignment.TOP);
+
             int rowIdx = 0;
             Row row = sheet.createRow(rowIdx++);
             row.createCell(0).setCellValue("Numéro Affaire");
-            row.createCell(1).setCellValue(safeToString(d.getNumeroDossier()));
+            row.createCell(1).setCellValue(SpreadsheetSanitizer.sanitize(d.getNumeroDossier()));
             row.getCell(0).setCellStyle(headerStyle);
             row = sheet.createRow(rowIdx++);
             row.createCell(0).setCellValue("Nature");
@@ -241,8 +248,8 @@ public class DossierExportService {
             for (Implication imp : implicationRepository.findByDossier_NumeroDossier(numeroDossier)) {
                 row = sheet.createRow(rowIdx++);
                 col = 0;
-                row.createCell(col++).setCellValue(safeToString(imp.getPartie() != null ? imp.getPartie().getNom() : null));
-                row.createCell(col++).setCellValue(safeToString(imp.getPartie() != null ? imp.getPartie().getPrenom() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(imp.getPartie() != null ? imp.getPartie().getNom() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(imp.getPartie() != null ? imp.getPartie().getPrenom() : null));
                 row.createCell(col++).setCellValue(humanize(imp.getRole()));
                 row.createCell(col++).setCellValue(humanize(imp.getLienParente()));
             }
@@ -263,10 +270,10 @@ public class DossierExportService {
                 col = 0;
                 DossierJuriste dj = i < sheetJuristes.size() ? sheetJuristes.get(i) : null;
                 DossierCabinet dc = i < sheetCabinets.size() ? sheetCabinets.get(i) : null;
-                row.createCell(col++).setCellValue(safeToString(dj != null && dj.getJuriste() != null ? dj.getJuriste().getNom() : null));
-                row.createCell(col++).setCellValue(safeToString(dj != null && dj.getJuriste() != null ? dj.getJuriste().getMatricule() : null));
-                row.createCell(col++).setCellValue(safeToString(dc != null && dc.getCabinet() != null ? dc.getCabinet().getNomCabinet() : null));
-                row.createCell(col++).setCellValue(safeToString(dc != null ? dc.getNomAvocatReferent() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(dj != null && dj.getJuriste() != null ? dj.getJuriste().getNom() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(dj != null && dj.getJuriste() != null ? dj.getJuriste().getMatricule() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(dc != null && dc.getCabinet() != null ? dc.getCabinet().getNomCabinet() : null));
+                row.createCell(col++).setCellValue(SpreadsheetSanitizer.sanitize(dc != null ? dc.getNomAvocatReferent() : null));
             }
 
             rowIdx++;
@@ -326,10 +333,14 @@ public class DossierExportService {
                 row = sheet.createRow(rowIdx++);
                 col = 0;
                 setCellDate(row.createCell(col++), a.getDate(), dateStyle);
-                row.createCell(col++).setCellValue(safeToString(a.getLieuAudience()));
+                Cell lieuCell = row.createCell(col++);
+                lieuCell.setCellValue(SpreadsheetSanitizer.sanitize(a.getLieuAudience()));
+                lieuCell.setCellStyle(wrapStyle);
                 row.createCell(col++).setCellValue(humanize(a.getTypeEtape()));
                 row.createCell(col++).setCellValue(humanize(a.getNatureDecision()));
-                row.createCell(col++).setCellValue(safeToString(a.getResumeDecision()));
+                Cell resumeCell = row.createCell(col++);
+                resumeCell.setCellValue(SpreadsheetSanitizer.sanitize(a.getResumeDecision()));
+                resumeCell.setCellStyle(wrapStyle);
                 row.createCell(col++).setCellValue(humanize(a.getIssuePourCarfo()));
                 setCellCurrencyNumeric(row.createCell(col++), a.getMontantObtenu(), currencyStyle);
                 setCellCurrencyNumeric(row.createCell(col++), a.getMontantDu(), currencyStyle);
@@ -337,6 +348,13 @@ public class DossierExportService {
             }
 
             for (int i = 0; i < 12; i++) sheet.autoSizeColumn(i);
+            // Le résumé de décision peut être long : on l'auto-dimensionne comme les autres colonnes
+            // (pour les cas courts), puis on plafonne sa largeur pour éviter une colonne démesurée —
+            // le retour à la ligne (wrapStyle) prend le relais au-delà de ce plafond.
+            final int largeurMaxColonneTexte = 60 * 256; // ~60 caractères, unité POI = 1/256e de caractère
+            if (sheet.getColumnWidth(4) > largeurMaxColonneTexte) {
+                sheet.setColumnWidth(4, largeurMaxColonneTexte);
+            }
             setWorkbookProperties(wb, "Fiche dossier " + numeroDossier);
             wb.write(baos);
             return baos.toByteArray();
