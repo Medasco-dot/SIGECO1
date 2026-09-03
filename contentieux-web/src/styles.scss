@@ -1,17 +1,18 @@
 :root {
-  /* Palette gris-ardoise sobre (proche des couleurs par defaut d'un theme Bootstrap),
-     sans lien avec une charte graphique institutionnelle particuliere.
+  /* Palette bleu Bootstrap "par defaut" (#0d6efd), la plus generique/anonyme des
+     options proposees : sidebar sombre neutre + bleu primaire partout pour boutons,
+     liens et etat actif, sans lien avec une charte graphique institutionnelle.
      --carfo-green et --carfo-muted restent nommees ainsi pour ne pas devoir renommer
      toutes les references dans les composants ; seules les valeurs ont change. Contraste
      verifie manuellement (blanc sur --carfo-green >> 4.5:1, cf. e2e/accessibilite.spec.ts). */
-  --carfo-green: #37474f;
-  --carfo-green-dark: #263238;
-  --carfo-green-light: #eceff1;
-  --carfo-blue: #1c6ea4;
-  --carfo-blue-dark: #14507a;
+  --carfo-green: #0a58ca;
+  --carfo-green-dark: #212529;
+  --carfo-green-light: #cfe2ff;
+  --carfo-blue: #0d6efd;
+  --carfo-blue-dark: #0a58ca;
   --carfo-gold: #6c757d;
   --carfo-gold-light: #f1f2f3;
-  --carfo-red: #b02a2a;
+  --carfo-red: #dc3545;
   --carfo-ink: #212529;
   --carfo-muted: #6c757d;
   --carfo-line: #dee2e6;
@@ -19,7 +20,7 @@
   --carfo-white: #ffffff;
   --carfo-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   --carfo-radius: 6px;
-  --carfo-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --carfo-font: Arial, Helvetica, 'Segoe UI', sans-serif;
 }
 
 * {
