@@ -1,15 +1,15 @@
 :root {
-  /* Palette bleu Bootstrap "par defaut" (#0d6efd), la plus generique/anonyme des
-     options proposees : sidebar sombre neutre + bleu primaire partout pour boutons,
-     liens et etat actif, sans lien avec une charte graphique institutionnelle.
+  /* Palette bleu sobre et desature (moins vif que le bleu Bootstrap "primary" pur) :
+     sidebar sombre neutre + ce bleu attenue partout pour boutons, liens et etat actif,
+     sans lien avec une charte graphique institutionnelle.
      --carfo-green et --carfo-muted restent nommees ainsi pour ne pas devoir renommer
      toutes les references dans les composants ; seules les valeurs ont change. Contraste
-     verifie manuellement (blanc sur --carfo-green >> 4.5:1, cf. e2e/accessibilite.spec.ts). */
-  --carfo-green: #0a58ca;
+     verifie manuellement (blanc sur --carfo-green : 5.13:1 >> 4.5:1, cf. e2e/accessibilite.spec.ts). */
+  --carfo-green: #45719c;
   --carfo-green-dark: #212529;
-  --carfo-green-light: #cfe2ff;
-  --carfo-blue: #0d6efd;
-  --carfo-blue-dark: #0a58ca;
+  --carfo-green-light: #dce6ee;
+  --carfo-blue: #45719c;
+  --carfo-blue-dark: #355a80;
   --carfo-gold: #6c757d;
   --carfo-gold-light: #f1f2f3;
   --carfo-red: #dc3545;
