@@ -138,8 +138,22 @@ class RbacIntegrationTest {
     }
 
     @Test
-    void laListeDesUtilisateursNeContientJamaisLeHashDuMotDePasse() {
+    void unJuristeNePeutPasConsulterLaListeDesUtilisateurs() {
+        // Regression du test de pre-deploiement du 4 septembre 2026 : GET /api/utilisateurs
+        // etait couvert uniquement par la regle generique "GET /api/** authenticated", donc
+        // accessible a n'importe quel role, alors que la gestion des comptes est censee etre
+        // reservee au chef de service (cf. SecurityConfig, §2.3.1 et §3.6.5 du rapport de stage).
         String token = login("juriste", "juriste123");
+
+        HttpClientErrorException ex = assertThrows(HttpClientErrorException.class, () -> rest.exchange(
+                url("/api/utilisateurs"), HttpMethod.GET, new HttpEntity<>(bearer(token)), Map[].class));
+
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
+    }
+
+    @Test
+    void laListeDesUtilisateursNeContientJamaisLeHashDuMotDePasse() {
+        String token = login("rbac-chef-service", MOT_DE_PASSE_TEST);
 
         ResponseEntity<Map[]> response = rest.exchange(
                 url("/api/utilisateurs"), HttpMethod.GET, new HttpEntity<>(bearer(token)), Map[].class);

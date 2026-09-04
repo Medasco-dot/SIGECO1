@@ -53,6 +53,13 @@ public class SecurityConfig {
                         // Generer/exporter des statistiques : reserve a Chef de service et Direction Generale
                         // (cf. diagramme de cas d'utilisation - le Juriste n'a pas ce cas d'utilisation)
                         .requestMatchers(HttpMethod.GET, "/api/statistiques/**").hasAnyRole(Role.chef_service.name(), Role.direction_generale.name())
+                        // Consulter la liste des comptes utilisateurs (identifiants, roles) : reserve
+                        // a Chef de service, au meme titre que la creation/modification/suppression
+                        // ci-dessous - sans cette regle GET, la regle generique "GET /api/** authenticated"
+                        // plus bas laissait n'importe quel compte authentifie (y compris Juriste) lire
+                        // l'annuaire complet des comptes via GET /api/utilisateurs (faille decouverte
+                        // lors du test de pre-deploiement du 4 septembre 2026).
+                        .requestMatchers(HttpMethod.GET, "/api/utilisateurs/**").hasRole(Role.chef_service.name())
                         .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
                         // Assigner un juriste a un dossier : reserve a Chef de service (cf. diagramme de cas d'utilisation)
                         .requestMatchers(HttpMethod.POST, "/api/dossiers-juristes/**").hasRole(Role.chef_service.name())

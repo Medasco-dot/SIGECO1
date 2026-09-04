@@ -20,23 +20,38 @@ test.describe('Parcours dossier (rôle juriste)', () => {
     await page.selectOption('select[formcontrolname="nature"]', 'pension_retraite');
     await page.fill('input[formcontrolname="montantReclame"]', '500000');
 
-    const creationResponse = page.waitForResponse((r) => r.url().includes('/api/dossiers') && r.request().method() === 'POST');
-    await page.click('button[type="submit"]');
-    const response = await creationResponse;
+    // On ne lit que le statut de la reponse (disponible des la reception des en-tetes), jamais
+    // son corps JSON : Angular navigue vers /dossiers immediatement apres la creation, et Chrome
+    // peut deja avoir libere le buffer CDP du corps de la reponse au moment ou le test tenterait
+    // de le lire ("Response body is not available for a response that was navigated away from")
+    // - un artefact de timing reste possible meme en attendant le corps immediatement (constate
+    // lors du test de pre-deploiement du 4 septembre 2026). Le numero du dossier cree est retrouve
+    // ensuite via l'interface (recherche par date d'ouverture), comme le ferait un utilisateur.
+    const [response] = await Promise.all([
+      page.waitForResponse((r) => r.url().includes('/api/dossiers') && r.request().method() === 'POST'),
+      page.click('button[type="submit"]'),
+    ]);
     expect(response.status()).toBe(201);
-    const created = await response.json();
-    const numeroDossier = created.numeroDossier as string;
-    expect(numeroDossier).toBeTruthy();
 
     await expect(page).toHaveURL(/\/dossiers$/);
+
+    await page.fill('input[formcontrolname="dateOuvertureMin"]', '2026-08-10');
+    await page.fill('input[formcontrolname="dateOuvertureMax"]', '2026-08-10');
+    await page.click('button:has-text("Rechercher")');
+    const ligne = page.locator('tbody tr', { hasText: 'Pension retraite' }).first();
+    await expect(ligne).toBeVisible();
+    const numeroDossier = (await ligne.locator('td').first().innerText()).trim();
+    expect(numeroDossier).toMatch(/^DOS-\d{4}-\d{4}$/);
 
     await page.goto(`/dossiers/${numeroDossier}`);
     await expect(page.locator('h1')).toHaveText(numeroDossier);
     await expect(page.getByText('Pension retraite').first()).toBeVisible();
 
     // Le test crée un vrai dossier en base : on le supprime pour ne pas polluer les données
-    // de démonstration à chaque exécution de la suite.
-    await page.request.delete(`http://localhost:8082/api/dossiers/${numeroDossier}`, {
+    // de démonstration à chaque exécution de la suite. Utilise la même baseURL que le reste
+    // du test (config Playwright) plutôt qu'un port codé en dur, pour rester valide aussi bien
+    // en dev (ng serve + backend 8082) qu'en conditions réelles de déploiement (Docker, port 80).
+    await page.request.delete(`/api/dossiers/${numeroDossier}`, {
       headers: { Authorization: `Bearer ${await page.evaluate(() => JSON.parse(sessionStorage.getItem('contentieux.auth') || '{}').token)}` },
     });
   });

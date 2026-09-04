@@ -10,11 +10,13 @@
   --carfo-green-light: #dce6ee;
   --carfo-blue: #45719c;
   --carfo-blue-dark: #355a80;
-  --carfo-gold: #6c757d;
+  --carfo-gold: #636a72;
   --carfo-gold-light: #f1f2f3;
   --carfo-red: #dc3545;
   --carfo-ink: #212529;
-  --carfo-muted: #6c757d;
+  /* #636a72 sur --carfo-paper (#f8f9fa) : 5.20:1 >= 4.5:1 AA. L'ancienne valeur #6c757d
+     etait a 4.44:1, sous le seuil, detecte par e2e/accessibilite.spec.ts (axe-core). */
+  --carfo-muted: #636a72;
   --carfo-line: #dee2e6;
   --carfo-paper: #f8f9fa;
   --carfo-white: #ffffff;
